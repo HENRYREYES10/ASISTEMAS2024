@@ -1,0 +1,76 @@
+import re
+from collections import Counter
+import datetime
+
+# Función para leer el archivo de logs
+def leer_logs(ruta_archivo):
+    try:
+        with open(ruta_archivo, 'r') as file:
+            logs = file.readlines()
+        return logs
+    except FileNotFoundError:
+        print(f"Error: El archivo {ruta_archivo} no se encontró.")
+        return []
+
+# Función para analizar los logs
+def analizar_logs(logs):
+    errores = []
+    advertencias = []
+    eventos_criticos = []
+
+    for log in logs:
+        if 'ERROR' in log:
+            errores.append(log)
+        elif 'WARNING' in log:
+            advertencias.append(log)
+        elif 'CRITICAL' in log:
+            eventos_criticos.append(log)
+    
+    return errores, advertencias, eventos_criticos
+
+# Función para generar un resumen de los logs
+def generar_resumen(errores, advertencias, eventos_criticos):
+    resumen = {
+        'Total de logs': len(errores) + len(advertencias) + len(eventos_criticos),
+        'Errores': len(errores),
+        'Advertencias': len(advertencias),
+        'Eventos críticos': len(eventos_criticos),
+        'Errores más comunes': Counter([log.split(' ')[2] for log in errores]).most_common(5),
+        'Advertencias más comunes': Counter([log.split(' ')[2] for log in advertencias]).most_common(5),
+        'Eventos críticos más comunes': Counter([log.split(' ')[2] for log in eventos_criticos]).most_common(5),
+        'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    }
+    return resumen
+
+# Función para imprimir el resumen de forma amigable
+def imprimir_resumen(resumen):
+    print("Resumen de Logs del Sistema")
+    print("===========================")
+    print(f"Fecha del resumen: {resumen['Fecha del resumen']}")
+    print(f"Total de logs analizados: {resumen['Total de logs']}")
+    print(f"Total de errores: {resumen['Errores']}")
+    print(f"Total de advertencias: {resumen['Advertencias']}")
+    print(f"Total de eventos críticos: {resumen['Eventos críticos']}")
+    print("\nErrores más comunes:")
+    for error in resumen.get('Errores más comunes', []):
+        print(f"{error[0]}: {error[1]} ocurrencias")
+    print("\nAdvertencias más comunes:")
+    for advertencia in resumen.get('Advertencias más comunes', []):
+        print(f"{advertencia[0]}: {advertencia[1]} ocurrencias")
+    print("\nEventos críticos más comunes:")
+    for evento in resumen.get('Eventos críticos más comunes', []):
+        print(f"{evento[0]}: {evento[1]} ocurrencias")
+
+# Ruta del archivo de logs (reemplazar con la ruta correcta)
+ruta_archivo = 'logs_del_sistema.log'
+
+# Leer y analizar los logs
+logs = leer_logs(ruta_archivo)
+if logs:
+    errores, advertencias, eventos_criticos = analizar_logs(logs)
+
+    # Generar y mostrar el resumen
+    resumen = generar_resumen(errores, advertencias, eventos_criticos)
+    imprimir_resumen(resumen)
+else:
+    print("No se pudo analizar los logs debido a un error al leer el archivo.")
