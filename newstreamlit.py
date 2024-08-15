@@ -12,48 +12,36 @@ def leer_logs(file):
         st.error(f"Error al leer el archivo: {e}")
         return []
 
+# Función para generar explicaciones específicas
 def generar_explicacion(log):
     if "Database connection failed" in log:
-        return "El sistema no pudo conectarse a la base de datos, lo que podría indicar un problema con el servidor de la base de datos o las credenciales."
+        return "Fallo en la conexión con la base de datos, posible problema con el servidor o credenciales incorrectas."
     elif "Unable to reach API endpoint" in log:
-        return "La aplicación no pudo comunicarse con el endpoint de la API. Esto podría deberse a un problema de red o a que el servicio de la API no está disponible."
+        return "Error en la comunicación con el endpoint de la API. Posible problema de red o servicio no disponible."
     elif "Failed to back up database" in log:
-        return "No se pudo realizar la copia de seguridad de la base de datos. Verifique el espacio disponible en el disco y los permisos de acceso."
+        return "Copia de seguridad de la base de datos fallida. Revisar espacio en disco y permisos."
     elif "High memory usage detected" in log:
-        return "El uso de memoria del sistema es elevado, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
+        return "Uso elevado de memoria detectado, posible riesgo de degradación del rendimiento."
     elif "Disk space low" in log:
-        return "El espacio en disco es bajo. Es necesario liberar espacio o aumentar la capacidad del almacenamiento para evitar interrupciones en el servicio."
+        return "Espacio en disco bajo, riesgo de interrupciones en el servicio si no se resuelve."
     elif "Slow response time" in log:
-        return "El tiempo de respuesta del sistema es lento, lo que podría afectar la experiencia del usuario y señalar un problema de rendimiento."
+        return "Tiempo de respuesta lento, indicativo de un posible problema de rendimiento."
     elif "System outage detected" in log:
-        return "Se detectó una interrupción en el sistema, lo que podría deberse a un fallo de hardware, una sobrecarga del sistema o un problema de red."
+        return "Interrupción del sistema detectada, posible fallo de hardware o sobrecarga del sistema."
     elif "Security breach detected" in log:
-        return "Se detectó una posible brecha de seguridad. Es crucial investigar el incidente para determinar el alcance y mitigar cualquier riesgo."
+        return "Posible brecha de seguridad detectada, requiere investigación urgente."
     elif "Application crash" in log:
-        return "La aplicación se bloqueó inesperadamente. Revise los registros de la aplicación para identificar la causa del problema y tomar medidas correctivas."
+        return "La aplicación se ha bloqueado, revisar los registros de errores para más detalles."
     elif "User session timeout" in log:
-        return "La sesión del usuario expiró, posiblemente debido a inactividad o a un problema en la configuración del tiempo de espera."
+        return "La sesión del usuario ha expirado, posiblemente debido a inactividad o configuración incorrecta."
     elif "Unauthorized access attempt" in log:
-        return "Se detectó un intento de acceso no autorizado, lo que podría indicar un intento de intrusión. Revise los registros de seguridad para más detalles."
+        return "Intento de acceso no autorizado detectado, revisar medidas de seguridad."
     elif "Server overload" in log:
-        return "El servidor está sobrecargado, lo que podría llevar a una degradación del rendimiento o a caídas del servicio. Considere equilibrar la carga o aumentar la capacidad del servidor."
-    elif "Backup disk full" in log:
-        return "El disco de respaldo está lleno, lo que impide realizar nuevas copias de seguridad. Es necesario liberar espacio o utilizar un disco con mayor capacidad."
-    elif "Service unavailable" in log:
-        return "El servicio no está disponible, lo que podría indicar un problema con el servidor o una interrupción en la red."
-    elif "High number of failed login attempts" in log:
-        return "Se detectó un número elevado de intentos fallidos de inicio de sesión, lo que podría indicar un intento de fuerza bruta. Se recomienda aumentar las medidas de seguridad."
-    elif "System clock synchronization failed" in log:
-        return "La sincronización del reloj del sistema falló, lo que podría causar problemas con los registros de eventos y la coherencia de los datos."
-    elif "Resource usage exceeded limits" in log:
-        return "El uso de recursos ha excedido los límites establecidos, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
-    elif "Security certificate expired" in log:
-        return "El certificado de seguridad ha expirado, lo que podría comprometer la seguridad de las comunicaciones en el sistema. Es crucial renovar el certificado a la brevedad."
-    elif "Application error" in log:
-        return "Ocurrió un error en la aplicación, lo que podría afectar su funcionamiento. Revise los detalles del error y aplique las correcciones necesarias."
+        return "Sobrecarga del servidor detectada, riesgo de degradación o caída del servicio."
     else:
         return "Este evento registrado requiere una revisión detallada."
 
+# Análisis de los logs
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -70,6 +58,7 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -81,6 +70,7 @@ def combinar_resultados(resultados):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Generar resumen de logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     def obtener_ultima_palabra(log):
         if isinstance(log, str):
@@ -103,6 +93,7 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+# Generar el informe en Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
     
@@ -142,14 +133,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Índice
     doc.add_heading("Índice", level=2)
     doc.add_paragraph("1. Resumen Ejecutivo")
-    doc.add_paragraph("2. Análisis de Errores")
-    doc.add_paragraph("3. Análisis de Advertencias")
-    doc.add_paragraph("4. Análisis de Eventos Críticos")
-    doc.add_paragraph("5. Distribución Temporal de Eventos")
-    doc.add_paragraph("6. Patrones Recurrentes")
-    doc.add_paragraph("7. Detalles de Errores, Advertencias y Eventos Críticos")
-    doc.add_paragraph("8. Conclusiones y Recomendaciones")
-    doc.add_paragraph("9. Firmas")
+    doc.add_paragraph("2. Alcance y Objetivo de la Auditoría")
+    doc.add_paragraph("3. Metodología")
+    doc.add_paragraph("4. Análisis de Logs")
+    doc.add_paragraph("5. Patrones Recurrentes")
+    doc.add_paragraph("6. Conclusiones")
+    doc.add_paragraph("7. Recomendaciones")
+    doc.add_paragraph("8. Firmas")
     doc.add_paragraph("\n")
     
     # Resumen Ejecutivo
@@ -163,122 +153,26 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
                       "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
     doc.add_paragraph("\n")
     
-    # Análisis de Errores
-    doc.add_heading("2. Análisis de Errores", level=2)
-    doc.add_paragraph("A continuación se detallan los errores más comunes encontrados:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción del Error'
-    table.cell(0, 1).text = 'Ocurrencias'
-    for error, ocurrencias in resumen['Errores más comunes']:
-        row = table.add_row().cells
-        row[0].text = error
-        row[1].text = str(ocurrencias)
-    doc.add_paragraph("\n")
+    # Análisis de Logs
+    doc.add_heading("4. Análisis de Logs", level=2)
+    doc.add_paragraph("Sección 4.1: Análisis de Errores")
+    doc.add_paragraph("Sección 4.2: Análisis de Advertencias")
+    doc.add_paragraph("Sección 4.3: Análisis de Eventos Críticos")
     
-    # Análisis de Advertencias
-    doc.add_heading("3. Análisis de Advertencias", level=2)
-    doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción de la Advertencia'
-    table.cell(0, 1).text = 'Ocurrencias'
-    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
-        row = table.add_row().cells
-        row[0].text = advertencia
-        row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
-    
-    # Análisis de Eventos Críticos
-    doc.add_heading("4. Análisis de Eventos Críticos", level=2)
-    doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción del Evento Crítico'
-    table.cell(0, 1).text = 'Ocurrencias'
-    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
-        row = table.add_row().cells
-        row[0].text = evento
-        row[1].text = str(ocurrencias)
-    doc.add_paragraph("\n")
-    
+
     # Distribución Temporal de Eventos
-    doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    doc.add_paragraph("Frecuencia de Errores por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Errores'
-    for hora, frecuencia in sorted(resumen['Frecuencia de errores por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Advertencias por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Advertencias'
-    for hora, frecuencia in sorted(resumen['Frecuencia de advertencias por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Eventos Críticos por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Eventos Críticos'
-    for hora, frecuencia in sorted(resumen['Frecuencia de eventos críticos por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    doc.add_paragraph("\n")
-    
-    # Patrones Recurrentes
-    doc.add_heading("6. Patrones Recurrentes", level=2)
+    doc.add_heading("5. Patrones Recurrentes", level=2)
     doc.add_paragraph(
         "En esta sección se identifican los patrones recurrentes de errores y advertencias "
         "que han ocurrido a lo largo del tiempo. Estos patrones pueden indicar problemas subyacentes "
         "que requieren una atención especial para mejorar la estabilidad y seguridad del sistema."
     )
 
-    # Análisis de errores recurrentes
-    doc.add_paragraph("Errores Recurrentes:")
-    for error, ocurrencias in resumen['Errores más comunes']:
-        doc.add_paragraph(f"- El error '{error}' ocurrió {ocurrencias} veces. Esto sugiere un problema persistente que debe ser investigado.")
-    
-    # Análisis de advertencias recurrentes
-    doc.add_paragraph("Advertencias Recurrentes:")
-    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
-        doc.add_paragraph(f"- La advertencia '{advertencia}' ocurrió {ocurrencias} veces. Es recomendable tomar medidas preventivas para evitar que se convierta en un problema mayor.")
-    
-    # Análisis de eventos críticos recurrentes
-    doc.add_paragraph("Eventos Críticos Recurrentes:")
-    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
-        doc.add_paragraph(f"- El evento crítico '{evento}' ocurrió {ocurrencias} veces. Esto requiere una atención inmediata para evitar interrupciones graves en el sistema.")
-
-    doc.add_paragraph(
-        "Estos patrones recurrentes indican áreas que pueden estar sufriendo problemas persistentes. "
-        "Es crucial revisar estos patrones en detalle y aplicar medidas correctivas para prevenir futuras incidencias."
-    )
-    doc.add_paragraph("\n")
-    
-    # Detalles Específicos
-    doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
-    
-    doc.add_heading("Errores:", level=3)
-    for log, explicacion in errores:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
-    
-    doc.add_heading("Advertencias:", level=3)
-    for log, explicacion in advertencias:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
-    
-    doc.add_heading("Eventos Críticos:", level=3)
-    for log, explicacion in eventos_criticos:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
     doc.add_paragraph("\n")
     
     # Conclusiones y Recomendaciones
-    doc.add_heading("8. Conclusiones y Recomendaciones", level=2)
+    doc.add_heading("6. Conclusiones y Recomendaciones", level=2)
     doc.add_paragraph(
         "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. "
         "Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. "
@@ -287,7 +181,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     )
     
     # Firma del Auditor
-    doc.add_heading("9. Firmas", level=2)
+    doc.add_heading("7. Firmas", level=2)
     doc.add_paragraph("Firma del Auditor: __________________________")
     doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("\n")
