@@ -231,7 +231,32 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
-    doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
+    doc.add_paragraph(
+        "En esta sección se identifican los patrones recurrentes de errores y advertencias "
+        "que han ocurrido a lo largo del tiempo. Estos patrones pueden indicar problemas subyacentes "
+        "que requieren una atención especial para mejorar la estabilidad y seguridad del sistema."
+    )
+
+    # Análisis de errores recurrentes
+    doc.add_paragraph("Errores Recurrentes:")
+    for error, ocurrencias in resumen['Errores más comunes']:
+        doc.add_paragraph(f"- El error '{error}' ocurrió {ocurrencias} veces. Esto sugiere un problema persistente que debe ser investigado.")
+    
+    # Análisis de advertencias recurrentes
+    doc.add_paragraph("Advertencias Recurrentes:")
+    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
+        doc.add_paragraph(f"- La advertencia '{advertencia}' ocurrió {ocurrencias} veces. Es recomendable tomar medidas preventivas para evitar que se convierta en un problema mayor.")
+    
+    # Análisis de eventos críticos recurrentes
+    doc.add_paragraph("Eventos Críticos Recurrentes:")
+    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
+        doc.add_paragraph(f"- El evento crítico '{evento}' ocurrió {ocurrencias} veces. Esto requiere una atención inmediata para evitar interrupciones graves en el sistema.")
+
+    doc.add_paragraph(
+        "Estos patrones recurrentes indican áreas que pueden estar sufriendo problemas persistentes. "
+        "Es crucial revisar estos patrones en detalle y aplicar medidas correctivas para prevenir futuras incidencias."
+    )
+    doc.add_paragraph("\n")
     
     # Detalles Específicos
     doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
