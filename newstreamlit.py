@@ -65,8 +65,10 @@ def combinar_resultados(resultados):
 # Función para generar un resumen del análisis de logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     def obtener_ultima_palabra(log):
-        partes = log.split(' ')
-        return partes[-1] if len(partes) > 1 else "Desconocido"
+        if isinstance(log, str):  # Verifica si 'log' es una cadena
+            partes = log.split(' ')
+            return partes[-1] if len(partes) > 1 else "Desconocido"
+        return "Desconocido"
 
     return {
         'Total de logs': len(errores) + len(advertencias) + len(eventos_criticos) + len(otros_eventos),
@@ -77,9 +79,9 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Errores más comunes': Counter([obtener_ultima_palabra(log) for log in errores]).most_common(5),
         'Advertencias más comunes': Counter([obtener_ultima_palabra(log) for log in advertencias]).most_common(5),
         'Eventos críticos más comunes': Counter([obtener_ultima_palabra(log) for log in eventos_criticos]).most_common(5),
-        'Frecuencia de errores por hora': Counter([log.split(' ')[1] for log in errores if len(log.split(' ')) > 1]),
-        'Frecuencia de advertencias por hora': Counter([log.split(' ')[1] for log in advertencias if len(log.split(' ')) > 1]),
-        'Frecuencia de eventos críticos por hora': Counter([log.split(' ')[1] for log in eventos_criticos if len(log.split(' ')) > 1]),
+        'Frecuencia de errores por hora': Counter([log.split(' ')[1] for log in errores if isinstance(log, str) and len(log.split(' ')) > 1]),
+        'Frecuencia de advertencias por hora': Counter([log.split(' ')[1] for log in advertencias if isinstance(log, str) and len(log.split(' ')) > 1]),
+        'Frecuencia de eventos críticos por hora': Counter([log.split(' ')[1] for log in eventos_criticos if isinstance(log, str) and len(log.split(' ')) > 1]),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
