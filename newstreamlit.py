@@ -12,36 +12,48 @@ def leer_logs(file):
         st.error(f"Error al leer el archivo: {e}")
         return []
 
-# Función para generar explicaciones específicas
 def generar_explicacion(log):
     if "Database connection failed" in log:
-        return "Fallo en la conexión con la base de datos, posible problema con el servidor o credenciales incorrectas."
+        return "Fallo en la conexión con la base de datos, lo que podría indicar un problema con el servidor o las credenciales."
     elif "Unable to reach API endpoint" in log:
-        return "Error en la comunicación con el endpoint de la API. Posible problema de red o servicio no disponible."
+        return "La aplicación no pudo comunicarse con el endpoint de la API. Esto podría deberse a un problema de red o a que el servicio de la API no está disponible."
     elif "Failed to back up database" in log:
-        return "Copia de seguridad de la base de datos fallida. Revisar espacio en disco y permisos."
+        return "No se pudo realizar la copia de seguridad de la base de datos. Verifique el espacio disponible en el disco y los permisos de acceso."
     elif "High memory usage detected" in log:
-        return "Uso elevado de memoria detectado, posible riesgo de degradación del rendimiento."
+        return "El uso de memoria del sistema es elevado, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
     elif "Disk space low" in log:
-        return "Espacio en disco bajo, riesgo de interrupciones en el servicio si no se resuelve."
+        return "El espacio en disco es bajo. Es necesario liberar espacio o aumentar la capacidad del almacenamiento para evitar interrupciones en el servicio."
     elif "Slow response time" in log:
-        return "Tiempo de respuesta lento, indicativo de un posible problema de rendimiento."
+        return "El tiempo de respuesta del sistema es lento, lo que podría afectar la experiencia del usuario y señalar un problema de rendimiento."
     elif "System outage detected" in log:
-        return "Interrupción del sistema detectada, posible fallo de hardware o sobrecarga del sistema."
+        return "Se detectó una interrupción en el sistema, lo que podría deberse a un fallo de hardware, una sobrecarga del sistema o un problema de red."
     elif "Security breach detected" in log:
-        return "Posible brecha de seguridad detectada, requiere investigación urgente."
+        return "Se detectó una posible brecha de seguridad. Es crucial investigar el incidente para determinar el alcance y mitigar cualquier riesgo."
     elif "Application crash" in log:
-        return "La aplicación se ha bloqueado, revisar los registros de errores para más detalles."
+        return "La aplicación se bloqueó inesperadamente. Revise los registros de la aplicación para identificar la causa del problema y tomar medidas correctivas."
     elif "User session timeout" in log:
-        return "La sesión del usuario ha expirado, posiblemente debido a inactividad o configuración incorrecta."
+        return "La sesión del usuario expiró, posiblemente debido a inactividad o a un problema en la configuración del tiempo de espera."
     elif "Unauthorized access attempt" in log:
-        return "Intento de acceso no autorizado detectado, revisar medidas de seguridad."
+        return "Se detectó un intento de acceso no autorizado, lo que podría indicar un intento de intrusión. Revise los registros de seguridad para más detalles."
     elif "Server overload" in log:
-        return "Sobrecarga del servidor detectada, riesgo de degradación o caída del servicio."
+        return "El servidor está sobrecargado, lo que podría llevar a una degradación del rendimiento o a caídas del servicio. Considere equilibrar la carga o aumentar la capacidad del servidor."
+    elif "Backup disk full" in log:
+        return "El disco de respaldo está lleno, lo que impide realizar nuevas copias de seguridad. Es necesario liberar espacio o utilizar un disco con mayor capacidad."
+    elif "Service unavailable" in log:
+        return "El servicio no está disponible, lo que podría indicar un problema con el servidor o una interrupción en la red."
+    elif "High number of failed login attempts" in log:
+        return "Se detectó un número elevado de intentos fallidos de inicio de sesión, lo que podría indicar un intento de fuerza bruta. Se recomienda aumentar las medidas de seguridad."
+    elif "System clock synchronization failed" in log:
+        return "La sincronización del reloj del sistema falló, lo que podría causar problemas con los registros de eventos y la coherencia de los datos."
+    elif "Resource usage exceeded limits" in log:
+        return "El uso de recursos ha excedido los límites establecidos, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
+    elif "Security certificate expired" in log:
+        return "El certificado de seguridad ha expirado, lo que podría comprometer la seguridad de las comunicaciones en el sistema. Es crucial renovar el certificado a la brevedad."
+    elif "Application error" in log:
+        return "Ocurrió un error en la aplicación, lo que podría afectar su funcionamiento. Revise los detalles del error y aplique las correcciones necesarias."
     else:
         return "Este evento registrado requiere una revisión detallada."
 
-# Análisis de los logs
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -58,7 +70,6 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-# Combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -70,7 +81,6 @@ def combinar_resultados(resultados):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-# Generar resumen de logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     def obtener_ultima_palabra(log):
         if isinstance(log, str):
@@ -93,7 +103,6 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-# Generar el informe en Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
     
@@ -155,12 +164,27 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Análisis de Logs
     doc.add_heading("4. Análisis de Logs", level=2)
-    doc.add_paragraph("Sección 4.1: Análisis de Errores")
-    doc.add_paragraph("Sección 4.2: Análisis de Advertencias")
-    doc.add_paragraph("Sección 4.3: Análisis de Eventos Críticos")
+    doc.add_heading("Sección 4.1: Análisis de Errores", level=3)
+    doc.add_paragraph("A continuación se detallan los errores encontrados durante el análisis:")
+    for error, explicacion in errores:
+        doc.add_paragraph(f"Log: {error}")
+        doc.add_paragraph(f"Explicación: {explicacion}")
+        doc.add_paragraph("\n")
     
-    doc.add_paragraph("\n")
-
+    doc.add_heading("Sección 4.2: Análisis de Advertencias", level=3)
+    doc.add_paragraph("A continuación se detallan las advertencias encontradas durante el análisis:")
+    for advertencia, explicacion in advertencias:
+        doc.add_paragraph(f"Log: {advertencia}")
+        doc.add_paragraph(f"Explicación: {explicacion}")
+        doc.add_paragraph("\n")
+    
+    doc.add_heading("Sección 4.3: Análisis de Eventos Críticos", level=3)
+    doc.add_paragraph("A continuación se detallan los eventos críticos encontrados durante el análisis:")
+    for evento_critico, explicacion in eventos_criticos:
+        doc.add_paragraph(f"Log: {evento_critico}")
+        doc.add_paragraph(f"Explicación: {explicacion}")
+        doc.add_paragraph("\n")
+    
     # Distribución Temporal de Eventos
     doc.add_heading("5. Patrones Recurrentes", level=2)
     doc.add_paragraph(
@@ -168,7 +192,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         "que han ocurrido a lo largo del tiempo. Estos patrones pueden indicar problemas subyacentes "
         "que requieren una atención especial para mejorar la estabilidad y seguridad del sistema."
     )
-
     doc.add_paragraph("\n")
     
     # Conclusiones y Recomendaciones
@@ -193,7 +216,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     return buffer
 
-# Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
     archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type="log")
