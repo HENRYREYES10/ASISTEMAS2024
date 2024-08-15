@@ -5,6 +5,7 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 
+# Función para leer los logs desde los archivos subidos
 def leer_logs(file):
     try:
         return file.read().decode('latin-1').splitlines()
@@ -12,8 +13,9 @@ def leer_logs(file):
         st.error(f"Error al leer el archivo: {e}")
         return []
 
+# Función para generar explicaciones personalizadas para los logs
 def generar_explicacion(log):
-    errores_explicaciones = {
+    explicaciones = {
         'Database connection failed': "El sistema no pudo establecer una conexión con la base de datos. Esto puede deberse a problemas de red, credenciales incorrectas o un fallo en el servicio de la base de datos.",
         'Unable to reach API endpoint': "El sistema no pudo comunicarse con el punto final de API. Esto puede deberse a un servidor API caído o problemas de red.",
         'Failed to back up database': "El respaldo de la base de datos no se pudo completar. Esto puede deberse a falta de espacio en disco o problemas de permisos.",
@@ -25,12 +27,13 @@ def generar_explicacion(log):
         'Application crash': "Una aplicación del sistema se ha bloqueado inesperadamente, posiblemente debido a errores en el código o conflictos de recursos."
     }
 
-    for clave, explicacion in errores_explicaciones.items():
+    for clave, explicacion in explicaciones.items():
         if clave in log:
             return explicacion
 
     return "Este evento registrado requiere una revisión detallada."
 
+# Función para analizar los logs y clasificarlos
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
 
@@ -47,6 +50,7 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para combinar los resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
 
@@ -58,6 +62,7 @@ def combinar_resultados(resultados):
 
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para generar un resumen del análisis de logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     return {
         'Total de logs': len(errores) + len(advertencias) + len(eventos_criticos) + len(otros_eventos),
@@ -74,6 +79,7 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+# Función para generar un informe en Word y preparar para descarga
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
 
@@ -104,6 +110,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
 
     return buffer
 
+# Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
     archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type="log")
