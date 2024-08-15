@@ -98,6 +98,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph(f"Total de Logs Analizados: {total_logs}")
     doc.add_paragraph("\n")
     
+    # Datos del Auditor
+    doc.add_heading("Datos del Auditor", level=2)
+    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    doc.add_paragraph("Cargo: Auditor de Sistemas")
+    doc.add_paragraph("Fecha del Informe: " + resumen['Fecha del resumen'])
+    doc.add_paragraph("\n")
+    
     # Introducción y Objetivo
     doc.add_heading("Introducción", level=2)
     doc.add_paragraph(
@@ -128,6 +135,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("6. Patrones Recurrentes")
     doc.add_paragraph("7. Detalles de Errores, Advertencias y Eventos Críticos")
     doc.add_paragraph("8. Conclusiones y Recomendaciones")
+    doc.add_paragraph("9. Firmas")
     doc.add_paragraph("\n")
     
     # Resumen Ejecutivo
@@ -238,6 +246,12 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         "Se recomienda una revisión exhaustiva de los componentes del sistema implicados en los errores más comunes, así como la implementación de mejores prácticas "
         "para la monitorización y el mantenimiento preventivo."
     )
+    
+    # Firma del Auditor
+    doc.add_heading("9. Firmas", level=2)
+    doc.add_paragraph("Firma del Auditor: __________________________")
+    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    doc.add_paragraph("\n")
     
     # Guardar el documento en un buffer en memoria
     buffer = BytesIO()
