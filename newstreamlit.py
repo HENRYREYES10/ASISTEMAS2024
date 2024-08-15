@@ -4,7 +4,6 @@ from collections import Counter
 import streamlit as st
 from docx import Document
 from io import BytesIO
-import matplotlib.pyplot as plt
 
 def leer_logs(file):
     try:
@@ -80,17 +79,6 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Frecuencia de eventos críticos por hora': Counter([log[0].split(' ')[1] for log in eventos_criticos if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
-
-def generar_grafico(titulo, datos, etiquetas):
-    fig, ax = plt.subplots()
-    ax.bar(etiquetas, datos)
-    ax.set_title(titulo)
-    ax.set_ylabel('Ocurrencias')
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    plt.close(fig)
-    buffer.seek(0)
-    return buffer
 
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
@@ -213,22 +201,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
     doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
-    # Aquí se pueden añadir gráficos de patrones si se encuentra necesario
-    
-    # Gráficos de Ejemplo
-    doc.add_heading("Gráficos de Distribución", level=2)
-    errores_grafico = generar_grafico("Distribución de Errores por Hora", list(resumen['Frecuencia de errores por hora'].values()), list(resumen['Frecuencia de errores por hora'].keys()))
-    advertencias_grafico = generar_grafico("Distribución de Advertencias por Hora", list(resumen['Frecuencia de advertencias por hora'].values()), list(resumen['Frecuencia de advertencias por hora'].keys()))
-    eventos_grafico = generar_grafico("Distribución de Eventos Críticos por Hora", list(resumen['Frecuencia de eventos críticos por hora'].values()), list(resumen['Frecuencia de eventos críticos por hora'].keys()))
-    
-    doc.add_paragraph("Distribución de Errores por Hora:")
-    doc.add_picture(errores_grafico)
-    
-    doc.add_paragraph("Distribución de Advertencias por Hora:")
-    doc.add_picture(advertencias_grafico)
-    
-    doc.add_paragraph("Distribución de Eventos Críticos por Hora:")
-    doc.add_picture(eventos_grafico)
     
     # Detalles Específicos
     doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
