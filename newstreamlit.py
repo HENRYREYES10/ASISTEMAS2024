@@ -4,6 +4,7 @@ from collections import Counter
 import streamlit as st
 from docx import Document
 from io import BytesIO
+import matplotlib.pyplot as plt
 
 def leer_logs(file):
     try:
@@ -80,6 +81,17 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+def generar_grafico(titulo, datos, etiquetas):
+    fig, ax = plt.subplots()
+    ax.bar(etiquetas, datos)
+    ax.set_title(titulo)
+    ax.set_ylabel('Ocurrencias')
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    plt.close(fig)
+    buffer.seek(0)
+    return buffer
+
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
     
@@ -116,15 +128,20 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("3. Análisis de Advertencias")
     doc.add_paragraph("4. Análisis de Eventos Críticos")
     doc.add_paragraph("5. Distribución Temporal de Eventos")
-    doc.add_paragraph("6. Detalles de Errores, Advertencias y Eventos Críticos")
-    doc.add_paragraph("7. Conclusiones y Recomendaciones")
+    doc.add_paragraph("6. Patrones Recurrentes")
+    doc.add_paragraph("7. Detalles de Errores, Advertencias y Eventos Críticos")
+    doc.add_paragraph("8. Conclusiones y Recomendaciones")
     doc.add_paragraph("\n")
     
     # Resumen Ejecutivo
     doc.add_heading("1. Resumen Ejecutivo", level=2)
     doc.add_paragraph(f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} "
                       f"fueron clasificados como errores, {resumen['Advertencias']} como advertencias y "
-                      f"{resumen['Eventos críticos']} como eventos críticos.")
+                      f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó "
+                      f"varios problemas críticos que requieren atención inmediata.")
+    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos "
+                      "mediante la identificación de palabras clave en los registros. Se generaron resúmenes "
+                      "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
     doc.add_paragraph("\n")
     
     # Análisis de Errores
@@ -193,8 +210,28 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         row[1].text = str(frecuencia)
     doc.add_paragraph("\n")
     
+    # Patrones Recurrentes
+    doc.add_heading("6. Patrones Recurrentes", level=2)
+    doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
+    # Aquí se pueden añadir gráficos de patrones si se encuentra necesario
+    
+    # Gráficos de Ejemplo
+    doc.add_heading("Gráficos de Distribución", level=2)
+    errores_grafico = generar_grafico("Distribución de Errores por Hora", list(resumen['Frecuencia de errores por hora'].values()), list(resumen['Frecuencia de errores por hora'].keys()))
+    advertencias_grafico = generar_grafico("Distribución de Advertencias por Hora", list(resumen['Frecuencia de advertencias por hora'].values()), list(resumen['Frecuencia de advertencias por hora'].keys()))
+    eventos_grafico = generar_grafico("Distribución de Eventos Críticos por Hora", list(resumen['Frecuencia de eventos críticos por hora'].values()), list(resumen['Frecuencia de eventos críticos por hora'].keys()))
+    
+    doc.add_paragraph("Distribución de Errores por Hora:")
+    doc.add_picture(errores_grafico)
+    
+    doc.add_paragraph("Distribución de Advertencias por Hora:")
+    doc.add_picture(advertencias_grafico)
+    
+    doc.add_paragraph("Distribución de Eventos Críticos por Hora:")
+    doc.add_picture(eventos_grafico)
+    
     # Detalles Específicos
-    doc.add_heading("6. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
+    doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
     
     doc.add_heading("Errores:", level=3)
     for log, explicacion in errores:
@@ -213,7 +250,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("\n")
     
     # Conclusiones y Recomendaciones
-    doc.add_heading("7. Conclusiones y Recomendaciones", level=2)
+    doc.add_heading("8. Conclusiones y Recomendaciones", level=2)
     doc.add_paragraph(
         "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. "
         "Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. "
