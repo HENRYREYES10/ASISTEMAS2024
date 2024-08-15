@@ -13,23 +13,32 @@ def leer_logs(file):
         return []
 
 def generar_explicacion(log):
-    explicaciones = {
-        'Database connection failed': "El sistema no pudo establecer una conexión con la base de datos. Esto podría deberse a problemas de red, credenciales incorrectas o un fallo en el servicio de la base de datos.",
-        'Unable to reach API endpoint': "El sistema no pudo comunicarse con el punto final de la API. Esto podría deberse a un servidor API caído o problemas de red.",
-        'Failed to back up database': "El respaldo de la base de datos no se pudo completar. Esto podría deberse a falta de espacio en disco o problemas de permisos.",
-        'High memory usage detected': "El sistema está utilizando una cantidad inusualmente alta de memoria, lo que podría llevar a un rendimiento lento o incluso a un bloqueo del sistema.",
-        'Disk space low': "El espacio en disco está llegando al límite, lo que podría impedir la capacidad del sistema para realizar operaciones de escritura.",
-        'Slow response time': "El tiempo de respuesta del sistema es más lento de lo esperado, lo que podría ser causado por una carga excesiva o cuellos de botella en el procesamiento.",
-        'System outage detected': "Se ha detectado una interrupción del sistema, lo que podría deberse a fallas en el hardware o problemas en la red.",
-        'Security breach detected': "Se ha detectado una posible brecha de seguridad, lo que podría indicar accesos no autorizados o intentos de intrusión.",
-        'Application crash': "Una aplicación del sistema se ha bloqueado inesperadamente, posiblemente debido a errores en el código o conflictos de recursos."
-    }
-    
-    for clave, explicacion in explicaciones.items():
-        if clave in log:
-            return explicacion
-    
-    return "Este evento registrado requiere una revisión detallada."
+    if "Database connection failed" in log:
+        return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
+    elif "Unable to reach API endpoint" in log:
+        return "Este error sugiere que el sistema no pudo comunicarse con el endpoint de la API. Verifique la conectividad de red y la disponibilidad del servicio."
+    elif "Failed to back up database" in log:
+        return "La copia de seguridad de la base de datos falló. Esto podría deberse a problemas de espacio en disco o permisos insuficientes."
+    elif "High memory usage detected" in log:
+        return "El sistema ha detectado un uso elevado de memoria. Es recomendable revisar los procesos en ejecución y optimizar el uso de recursos."
+    elif "Disk space low" in log:
+        return "El espacio en disco es insuficiente. Se recomienda liberar espacio o aumentar la capacidad del almacenamiento."
+    elif "Slow response time" in log:
+        return "El tiempo de respuesta del sistema es lento. Esto podría ser causado por una carga excesiva o cuellos de botella en el sistema."
+    elif "System outage detected" in log:
+        return "Se ha detectado una interrupción del sistema. Es posible que haya fallas en el hardware o problemas de red que requieran atención inmediata."
+    elif "Security breach detected" in log:
+        return "Se ha detectado una posible brecha de seguridad. Revise los accesos y tome medidas correctivas para proteger el sistema."
+    elif "Application crash" in log:
+        return "Una aplicación se ha bloqueado inesperadamente. Es necesario revisar los registros de la aplicación para identificar la causa del fallo."
+    elif "User session timeout" in log:
+        return "La sesión del usuario ha expirado. Esto podría deberse a inactividad prolongada o a un problema en la configuración del tiempo de espera."
+    elif "Unauthorized access attempt" in log:
+        return "Se detectó un intento de acceso no autorizado. Se recomienda revisar los registros de seguridad y tomar medidas para fortalecer la protección."
+    elif "Server overload" in log:
+        return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
+    else:
+        return "Este evento registrado requiere una revisión detallada."
 
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
