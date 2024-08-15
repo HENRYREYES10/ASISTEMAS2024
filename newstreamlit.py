@@ -14,29 +14,43 @@ def leer_logs(file):
 
 def generar_explicacion(log):
     if "Database connection failed" in log:
-        return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
+        return "El sistema no pudo conectarse a la base de datos, lo que podría indicar un problema con el servidor de la base de datos o las credenciales."
     elif "Unable to reach API endpoint" in log:
-        return "Este error sugiere que el sistema no pudo comunicarse con el endpoint de la API. Verifique la conectividad de red y la disponibilidad del servicio."
+        return "La aplicación no pudo comunicarse con el endpoint de la API. Esto podría deberse a un problema de red o a que el servicio de la API no está disponible."
     elif "Failed to back up database" in log:
-        return "La copia de seguridad de la base de datos falló. Esto podría deberse a problemas de espacio en disco o permisos insuficientes."
+        return "No se pudo realizar la copia de seguridad de la base de datos. Verifique el espacio disponible en el disco y los permisos de acceso."
     elif "High memory usage detected" in log:
-        return "El sistema ha detectado un uso elevado de memoria. Es recomendable revisar los procesos en ejecución y optimizar el uso de recursos."
+        return "El uso de memoria del sistema es elevado, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
     elif "Disk space low" in log:
-        return "El espacio en disco es insuficiente. Se recomienda liberar espacio o aumentar la capacidad del almacenamiento."
+        return "El espacio en disco es bajo. Es necesario liberar espacio o aumentar la capacidad del almacenamiento para evitar interrupciones en el servicio."
     elif "Slow response time" in log:
-        return "El tiempo de respuesta del sistema es lento. Esto podría ser causado por una carga excesiva o cuellos de botella en el sistema."
+        return "El tiempo de respuesta del sistema es lento, lo que podría afectar la experiencia del usuario y señalar un problema de rendimiento."
     elif "System outage detected" in log:
-        return "Se ha detectado una interrupción del sistema. Es posible que haya fallas en el hardware o problemas de red que requieran atención inmediata."
+        return "Se detectó una interrupción en el sistema, lo que podría deberse a un fallo de hardware, una sobrecarga del sistema o un problema de red."
     elif "Security breach detected" in log:
-        return "Se ha detectado una posible brecha de seguridad. Revise los accesos y tome medidas correctivas para proteger el sistema."
+        return "Se detectó una posible brecha de seguridad. Es crucial investigar el incidente para determinar el alcance y mitigar cualquier riesgo."
     elif "Application crash" in log:
-        return "Una aplicación se ha bloqueado inesperadamente. Es necesario revisar los registros de la aplicación para identificar la causa del fallo."
+        return "La aplicación se bloqueó inesperadamente. Revise los registros de la aplicación para identificar la causa del problema y tomar medidas correctivas."
     elif "User session timeout" in log:
-        return "La sesión del usuario ha expirado. Esto podría deberse a inactividad prolongada o a un problema en la configuración del tiempo de espera."
+        return "La sesión del usuario expiró, posiblemente debido a inactividad o a un problema en la configuración del tiempo de espera."
     elif "Unauthorized access attempt" in log:
-        return "Se detectó un intento de acceso no autorizado. Se recomienda revisar los registros de seguridad y tomar medidas para fortalecer la protección."
+        return "Se detectó un intento de acceso no autorizado, lo que podría indicar un intento de intrusión. Revise los registros de seguridad para más detalles."
     elif "Server overload" in log:
-        return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
+        return "El servidor está sobrecargado, lo que podría llevar a una degradación del rendimiento o a caídas del servicio. Considere equilibrar la carga o aumentar la capacidad del servidor."
+    elif "Backup disk full" in log:
+        return "El disco de respaldo está lleno, lo que impide realizar nuevas copias de seguridad. Es necesario liberar espacio o utilizar un disco con mayor capacidad."
+    elif "Service unavailable" in log:
+        return "El servicio no está disponible, lo que podría indicar un problema con el servidor o una interrupción en la red."
+    elif "High number of failed login attempts" in log:
+        return "Se detectó un número elevado de intentos fallidos de inicio de sesión, lo que podría indicar un intento de fuerza bruta. Se recomienda aumentar las medidas de seguridad."
+    elif "System clock synchronization failed" in log:
+        return "La sincronización del reloj del sistema falló, lo que podría causar problemas con los registros de eventos y la coherencia de los datos."
+    elif "Resource usage exceeded limits" in log:
+        return "El uso de recursos ha excedido los límites establecidos, lo que podría llevar a un rendimiento degradado o a fallos del sistema si no se gestiona adecuadamente."
+    elif "Security certificate expired" in log:
+        return "El certificado de seguridad ha expirado, lo que podría comprometer la seguridad de las comunicaciones en el sistema. Es crucial renovar el certificado a la brevedad."
+    elif "Application error" in log:
+        return "Ocurrió un error en la aplicación, lo que podría afectar su funcionamiento. Revise los detalles del error y aplique las correcciones necesarias."
     else:
         return "Este evento registrado requiere una revisión detallada."
 
