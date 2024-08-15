@@ -5,6 +5,7 @@ import streamlit as st
 from docx import Document
 from io import BytesIO
 
+# Función para leer los logs desde el archivo subido
 def leer_logs(file):
     try:
         return file.read().decode('latin-1').splitlines()
@@ -12,6 +13,7 @@ def leer_logs(file):
         st.error(f"Error al leer el archivo: {e}")
         return []
 
+# Función para generar explicaciones detalladas para cada tipo de log
 def generar_explicacion(log):
     if "Database connection failed" in log:
         return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
@@ -40,6 +42,7 @@ def generar_explicacion(log):
     else:
         return "Este evento registrado requiere una revisión detallada."
 
+# Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -56,6 +59,7 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -67,6 +71,7 @@ def combinar_resultados(resultados):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para generar un resumen estadístico de los logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     def obtener_ultima_palabra(log):
         if isinstance(log, str):
@@ -89,6 +94,7 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+# Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
     
