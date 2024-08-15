@@ -229,19 +229,31 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
     
     doc.add_heading("Errores:", level=3)
+    table = doc.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = 'Log'
+    table.cell(0, 1).text = 'Explicación'
     for log, explicacion in errores:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
+        row = table.add_row().cells
+        row[0].text = log
+        row[1].text = explicacion
     
     doc.add_heading("Advertencias:", level=3)
+    table = doc.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = 'Log'
+    table.cell(0, 1).text = 'Explicación'
     for log, explicacion in advertencias:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
+        row = table.add_row().cells
+        row[0].text = log
+        row[1].text = explicacion
     
     doc.add_heading("Eventos Críticos:", level=3)
+    table = doc.add_table(rows=1, cols=2)
+    table.cell(0, 0).text = 'Log'
+    table.cell(0, 1).text = 'Explicación'
     for log, explicacion in eventos_criticos:
-        doc.add_paragraph(f"Log: {log}")
-        doc.add_paragraph(f"Explicación: {explicacion}")
+        row = table.add_row().cells
+        row[0].text = log
+        row[1].text = explicacion
     doc.add_paragraph("\n")
     
     # Conclusiones y Recomendaciones
