@@ -7,7 +7,6 @@ from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
-import matplotlib.pyplot as plt
 
 defleer_logs(file):
     """Lee y decodifica los logs desde un archivo."""try:
@@ -92,25 +91,7 @@ defagregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-defgenerar_grafico_frecuencia(frecuencia, titulo):
-    """Genera un gráfico de barras basado en la frecuencia de eventos."""
-    horas = sorted(frecuencia.keys())
-    valores = [frecuencia[hora] for hora in horas]
-    
-    plt.figure(figsize=(10, 6))
-    plt.bar(horas, valores, color='skyblue')
-    plt.xlabel('Hora')
-    plt.ylabel('Frecuencia')
-    plt.title(titulo)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    buffer = BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    return buffer
-
-defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs, nombre_auditor):
+defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     """Genera un informe de auditoría en formato Word."""
     doc = Document()
     
@@ -122,7 +103,7 @@ defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_
     
     # Datos del Auditor
     doc.add_heading("Datos del Auditor", level=2)
-    doc.add_paragraph(f"Nombre del Auditor: {nombre_auditor}")
+    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("Cargo: Auditor de Sistemas")
     doc.add_paragraph("Fecha del Informe: " + resumen['Fecha del resumen'])
     doc.add_paragraph("\n")
@@ -229,18 +210,7 @@ defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
     doc.add_paragraph("\n")
-
-    # Incluir gráficos en el informe
-    doc.add_heading("Gráficos de Distribución Temporal", level=2)
-    for titulo, frecuencia in [
-        ("Frecuencia de Errores por Hora", resumen['Frecuencia de errores por hora']),
-        ("Frecuencia de Advertencias por Hora", resumen['Frecuencia de advertencias por hora']),
-        ("Frecuencia de Eventos Críticos por Hora", resumen['Frecuencia de eventos críticos por hora'])
-    ]:
-        grafico = generar_grafico_frecuencia(frecuencia, titulo)
-        doc.add_paragraph(titulo)
-        doc.add_picture(grafico, width=Pt(480))
-
+    
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
     doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
@@ -288,7 +258,7 @@ defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_
     # Firma del Auditor
     doc.add_heading("9. Firmas", level=2)
     doc.add_paragraph("Firma del Auditor: __________________________")
-    doc.add_paragraph(f"Nombre del Auditor: {nombre_auditor}")
+    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("\n")
     
     # Guardar el documento en un buffer en memoria
@@ -300,13 +270,9 @@ defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_
 
 defmain():
     st.title("Auditoría de Logs del Sistema")
-    
-    # Entrada del nombre del auditor
-    nombre_auditor = st.text_input("Ingrese su nombre")
-    
     archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type="log")
     
-    if archivos_subidos and nombre_auditor:
+    if archivos_subidos:
         resultados = []
         total_logs = 0for archivo in archivos_subidos:
             logs = leer_logs(archivo)
@@ -325,7 +291,7 @@ defmain():
         st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
         
         if st.button("Generar Informe Word"):
-            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs, nombre_auditor)
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
