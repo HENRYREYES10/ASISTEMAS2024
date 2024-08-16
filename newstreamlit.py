@@ -7,62 +7,47 @@ from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
+import matplotlib.pyplot as plt
 
-def leer_logs(file):
-    """Lee y decodifica los logs desde un archivo."""
-    try:
+defleer_logs(file):
+    """Lee y decodifica los logs desde un archivo."""try:
         return file.read().decode('latin-1').splitlines()
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
         return []
 
-def generar_explicacion(log):
-    """Genera una explicación detallada basada en el contenido del log."""
-    if "Database connection failed" in log:
-        return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
-    elif "Unable to reach API endpoint" in log:
-        return "Este error sugiere que el sistema no pudo comunicarse con el endpoint de la API. Verifique la conectividad de red y la disponibilidad del servicio."
-    elif "Failed to back up database" in log:
-        return "La copia de seguridad de la base de datos falló. Esto podría deberse a problemas de espacio en disco o permisos insuficientes."
-    elif "High memory usage detected" in log:
-        return "El sistema ha detectado un uso elevado de memoria. Es recomendable revisar los procesos en ejecución y optimizar el uso de recursos."
-    elif "Disk space low" in log:
-        return "El espacio en disco es insuficiente. Se recomienda liberar espacio o aumentar la capacidad del almacenamiento."
-    elif "Slow response time" in log:
-        return "El tiempo de respuesta del sistema es lento. Esto podría ser causado por una carga excesiva o cuellos de botella en el sistema."
-    elif "System outage detected" in log:
-        return "Se ha detectado una interrupción del sistema. Es posible que haya fallas en el hardware o problemas de red que requieran atención inmediata."
-    elif "Security breach detected" in log:
-        return "Se ha detectado una posible brecha de seguridad. Revise los accesos y tome medidas correctivas para proteger el sistema."
-    elif "Application crash" in log:
-        return "Una aplicación se ha bloqueado inesperadamente. Es necesario revisar los registros de la aplicación para identificar la causa del fallo."
-    elif "User session timeout" in log:
-        return "La sesión del usuario ha expirado. Esto podría deberse a inactividad prolongada o a un problema en la configuración del tiempo de espera."
-    elif "Unauthorized access attempt" in log:
-        return "Se detectó un intento de acceso no autorizado. Se recomienda revisar los registros de seguridad y tomar medidas para fortalecer la protección."
-    elif "Server overload" in log:
-        return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
-    else:
-        return "Este evento registrado requiere una revisión detallada."
-
-def analizar_logs(logs):
+defgenerar_explicacion(log):
+    """Genera una explicación detallada basada en el contenido del log."""if"Database connection failed"in log:
+        return"Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."elif"Unable to reach API endpoint"in log:
+        return"Este error sugiere que el sistema no pudo comunicarse con el endpoint de la API. Verifique la conectividad de red y la disponibilidad del servicio."elif"Failed to back up database"in log:
+        return"La copia de seguridad de la base de datos falló. Esto podría deberse a problemas de espacio en disco o permisos insuficientes."elif"High memory usage detected"in log:
+        return"El sistema ha detectado un uso elevado de memoria. Es recomendable revisar los procesos en ejecución y optimizar el uso de recursos."elif"Disk space low"in log:
+        return"El espacio en disco es insuficiente. Se recomienda liberar espacio o aumentar la capacidad del almacenamiento."elif"Slow response time"in log:
+        return"El tiempo de respuesta del sistema es lento. Esto podría ser causado por una carga excesiva o cuellos de botella en el sistema."elif"System outage detected"in log:
+        return"Se ha detectado una interrupción del sistema. Es posible que haya fallas en el hardware o problemas de red que requieran atención inmediata."elif"Security breach detected"in log:
+        return"Se ha detectado una posible brecha de seguridad. Revise los accesos y tome medidas correctivas para proteger el sistema."elif"Application crash"in log:
+        return"Una aplicación se ha bloqueado inesperadamente. Es necesario revisar los registros de la aplicación para identificar la causa del fallo."elif"User session timeout"in log:
+        return"La sesión del usuario ha expirado. Esto podría deberse a inactividad prolongada o a un problema en la configuración del tiempo de espera."elif"Unauthorized access attempt"in log:
+        return"Se detectó un intento de acceso no autorizado. Se recomienda revisar los registros de seguridad y tomar medidas para fortalecer la protección."elif"Server overload"in log:
+        return"El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."else:
+        return"Este evento registrado requiere una revisión detallada."defanalizar_logs(logs):
     """Clasifica los logs en errores, advertencias, eventos críticos y otros eventos."""
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for log in logs:
         explicacion = generar_explicacion(log)
-        if 'ERROR' in log:
+        if'ERROR'in log:
             errores.append((log, explicacion))
-        elif 'WARNING' in log:
+        elif'WARNING'in log:
             advertencias.append((log, explicacion))
-        elif 'CRITICAL' in log:
+        elif'CRITICAL'in log:
             eventos_criticos.append((log, explicacion))
         else:
             otros_eventos.append((log, explicacion))
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-def combinar_resultados(resultados):
+defcombinar_resultados(resultados):
     """Combina los resultados de análisis de múltiples archivos de logs."""
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
@@ -74,15 +59,11 @@ def combinar_resultados(resultados):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
-    """Genera un resumen estadístico de los logs."""
-    def obtener_ultima_palabra(log):
-        if isinstance(log, str):
+defgenerar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
+    """Genera un resumen estadístico de los logs."""defobtener_ultima_palabra(log):
+        ifisinstance(log, str):
             partes = log.split(' ')
-            return partes[-1] if len(partes) > 1 else "Desconocido"
-        return "Desconocido"
-    
-    return {
+            return partes[-1] iflen(partes) > 1else"Desconocido"return"Desconocido"return {
         'Total de logs': len(errores) + len(advertencias) + len(eventos_criticos) + len(otros_eventos),
         'Errores': len(errores),
         'Advertencias': len(advertencias),
@@ -91,16 +72,15 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Errores más comunes': Counter([obtener_ultima_palabra(log[0]) for log in errores]).most_common(5),
         'Advertencias más comunes': Counter([obtener_ultima_palabra(log[0]) for log in advertencias]).most_common(5),
         'Eventos críticos más comunes': Counter([obtener_ultima_palabra(log[0]) for log in eventos_criticos]).most_common(5),
-        'Frecuencia de errores por hora': Counter([log[0].split(' ')[1] for log in errores if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
-        'Frecuencia de advertencias por hora': Counter([log[0].split(' ')[1] for log in advertencias if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
-        'Frecuencia de eventos críticos por hora': Counter([log[0].split(' ')[1] for log in eventos_criticos if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
+        'Frecuencia de errores por hora': Counter([log[0].split(' ')[1] for log in errores ifisinstance(log[0], str) andlen(log[0].split(' ')) > 1]),
+        'Frecuencia de advertencias por hora': Counter([log[0].split(' ')[1] for log in advertencias ifisinstance(log[0], str) andlen(log[0].split(' ')) > 1]),
+        'Frecuencia de eventos críticos por hora': Counter([log[0].split(' ')[1] for log in eventos_criticos ifisinstance(log[0], str) andlen(log[0].split(' ')) > 1]),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-def agregar_bordes_tabla(tabla):
+defagregar_bordes_tabla(tabla):
     """Añade bordes a todas las celdas de una tabla en un documento de Word."""
-    tbl = tabla._tbl  # Obtener la tabla OXML
-    for cell in tbl.iter_tcs():
+    tbl = tabla._tbl  # Obtener la tabla OXMLfor cell in tbl.iter_tcs():
         tcPr = cell.get_or_add_tcPr()
         tcBorders = OxmlElement('w:tcBorders')
         for border_name in ['top', 'left', 'bottom', 'right']:
@@ -112,7 +92,25 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
+defgenerar_grafico_frecuencia(frecuencia, titulo):
+    """Genera un gráfico de barras basado en la frecuencia de eventos."""
+    horas = sorted(frecuencia.keys())
+    valores = [frecuencia[hora] for hora in horas]
+    
+    plt.figure(figsize=(10, 6))
+    plt.bar(horas, valores, color='skyblue')
+    plt.xlabel('Hora')
+    plt.ylabel('Frecuencia')
+    plt.title(titulo)
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    
+    buffer = BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    return buffer
+
+defgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs, nombre_auditor):
     """Genera un informe de auditoría en formato Word."""
     doc = Document()
     
@@ -124,7 +122,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Datos del Auditor
     doc.add_heading("Datos del Auditor", level=2)
-    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    doc.add_paragraph(f"Nombre del Auditor: {nombre_auditor}")
     doc.add_paragraph("Cargo: Auditor de Sistemas")
     doc.add_paragraph("Fecha del Informe: " + resumen['Fecha del resumen'])
     doc.add_paragraph("\n")
@@ -132,20 +130,12 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Introducción y Objetivo
     doc.add_heading("Introducción", level=2)
     doc.add_paragraph(
-        "Los logs son registros detallados de eventos que ocurren dentro de un sistema. "
-        "Estos registros son fundamentales para la monitorización, diagnóstico y auditoría "
-        "del sistema, proporcionando un rastro de actividades que permite a los administradores "
-        "y desarrolladores identificar y resolver problemas, asegurar el cumplimiento normativo y "
-        "mantener la seguridad del sistema. Este informe tiene como objetivo analizar los logs "
-        "proporcionados, identificar posibles errores, advertencias y eventos críticos, y ofrecer "
-        "recomendaciones basadas en los hallazgos."
+        "Los logs son registros detallados de eventos que ocurren dentro de un sistema. ""Estos registros son fundamentales para la monitorización, diagnóstico y auditoría ""del sistema, proporcionando un rastro de actividades que permite a los administradores ""y desarrolladores identificar y resolver problemas, asegurar el cumplimiento normativo y ""mantener la seguridad del sistema. Este informe tiene como objetivo analizar los logs ""proporcionados, identificar posibles errores, advertencias y eventos críticos, y ofrecer ""recomendaciones basadas en los hallazgos."
     )
     
     doc.add_heading("Objetivo de la Prueba", level=2)
     doc.add_paragraph(
-        "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis "
-        "de los logs generados, identificar patrones de comportamiento anómalo, y determinar las áreas "
-        "que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
+        "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis ""de los logs generados, identificar patrones de comportamiento anómalo, y determinar las áreas ""que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
     
@@ -164,13 +154,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Resumen Ejecutivo
     doc.add_heading("1. Resumen Ejecutivo", level=2)
-    doc.add_paragraph(f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} "
-                      f"fueron clasificados como errores, {resumen['Advertencias']} como advertencias y "
-                      f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó "
-                      f"varios problemas críticos que requieren atención inmediata.")
-    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos "
-                      "mediante la identificación de palabras clave en los registros. Se generaron resúmenes "
-                      "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
+    doc.add_paragraph(f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} "f"fueron clasificados como errores, {resumen['Advertencias']} como advertencias y "f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó "f"varios problemas críticos que requieren atención inmediata.")
+    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos ""mediante la identificación de palabras clave en los registros. Se generaron resúmenes ""estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
     doc.add_paragraph("\n")
     
     # Análisis de Errores
@@ -219,7 +204,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table.cell(0, 0).text = 'Hora'
     table.cell(0, 1).text = 'Errores'
     agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de errores por hora'].items()):
+    for hora, frecuencia insorted(resumen['Frecuencia de errores por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
@@ -229,7 +214,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table.cell(0, 0).text = 'Hora'
     table.cell(0, 1).text = 'Advertencias'
     agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de advertencias por hora'].items()):
+    for hora, frecuencia insorted(resumen['Frecuencia de advertencias por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
@@ -239,12 +224,23 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table.cell(0, 0).text = 'Hora'
     table.cell(0, 1).text = 'Eventos Críticos'
     agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de eventos críticos por hora'].items()):
+    for hora, frecuencia insorted(resumen['Frecuencia de eventos críticos por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
     doc.add_paragraph("\n")
-    
+
+    # Incluir gráficos en el informe
+    doc.add_heading("Gráficos de Distribución Temporal", level=2)
+    for titulo, frecuencia in [
+        ("Frecuencia de Errores por Hora", resumen['Frecuencia de errores por hora']),
+        ("Frecuencia de Advertencias por Hora", resumen['Frecuencia de advertencias por hora']),
+        ("Frecuencia de Eventos Críticos por Hora", resumen['Frecuencia de eventos críticos por hora'])
+    ]:
+        grafico = generar_grafico_frecuencia(frecuencia, titulo)
+        doc.add_paragraph(titulo)
+        doc.add_picture(grafico, width=Pt(480))
+
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
     doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
@@ -286,16 +282,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Conclusiones y Recomendaciones
     doc.add_heading("8. Conclusiones y Recomendaciones", level=2)
     doc.add_paragraph(
-        "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. "
-        "Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. "
-        "Se recomienda una revisión exhaustiva de los componentes del sistema implicados en los errores más comunes, así como la implementación de mejores prácticas "
-        "para la monitorización y el mantenimiento preventivo."
+        "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. ""Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. ""Se recomienda una revisión exhaustiva de los componentes del sistema implicados en los errores más comunes, así como la implementación de mejores prácticas ""para la monitorización y el mantenimiento preventivo."
     )
     
     # Firma del Auditor
     doc.add_heading("9. Firmas", level=2)
     doc.add_paragraph("Firma del Auditor: __________________________")
-    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    doc.add_paragraph(f"Nombre del Auditor: {nombre_auditor}")
     doc.add_paragraph("\n")
     
     # Guardar el documento en un buffer en memoria
@@ -305,15 +298,17 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     return buffer
 
-def main():
+defmain():
     st.title("Auditoría de Logs del Sistema")
+    
+    # Entrada del nombre del auditor
+    nombre_auditor = st.text_input("Ingrese su nombre")
+    
     archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type="log")
     
-    if archivos_subidos:
+    if archivos_subidos and nombre_auditor:
         resultados = []
-        total_logs = 0
-        
-        for archivo in archivos_subidos:
+        total_logs = 0for archivo in archivos_subidos:
             logs = leer_logs(archivo)
             total_logs += len(logs)
             if logs:
@@ -330,7 +325,7 @@ def main():
         st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
         
         if st.button("Generar Informe Word"):
-            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs)
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs, nombre_auditor)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
