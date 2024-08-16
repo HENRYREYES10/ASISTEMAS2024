@@ -8,16 +8,16 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
 
-# Función para leer los logs desde el archivo subido
 def leer_logs(file):
+    """Lee y decodifica los logs desde un archivo."""
     try:
         return file.read().decode('latin-1').splitlines()
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
         return []
 
-# Función para generar explicaciones detalladas para cada tipo de log
 def generar_explicacion(log):
+    """Genera una explicación detallada basada en el contenido del log."""
     if "Database connection failed" in log:
         return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
     elif "Unable to reach API endpoint" in log:
@@ -45,8 +45,8 @@ def generar_explicacion(log):
     else:
         return "Este evento registrado requiere una revisión detallada."
 
-# Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
+    """Clasifica los logs en errores, advertencias, eventos críticos y otros eventos."""
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for log in logs:
@@ -62,8 +62,8 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-# Función para combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
+    """Combina los resultados de análisis de múltiples archivos de logs."""
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for resultado in resultados:
@@ -74,8 +74,8 @@ def combinar_resultados(resultados):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
-# Función para generar un resumen estadístico de los logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
+    """Genera un resumen estadístico de los logs."""
     def obtener_ultima_palabra(log):
         if isinstance(log, str):
             partes = log.split(' ')
@@ -97,8 +97,8 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-# Función para añadir bordes a una tabla en Word
 def agregar_bordes_tabla(tabla):
+    """Añade bordes a todas las celdas de una tabla en un documento de Word."""
     tbl = tabla._tbl  # Obtener la tabla OXML
     for cell in tbl.iter_tcs():
         tcPr = cell.get_or_add_tcPr()
@@ -112,8 +112,8 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
+    """Genera un informe de auditoría en formato Word."""
     doc = Document()
     
     # Portada
@@ -305,7 +305,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     return buffer
 
-# Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
     archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type="log")
