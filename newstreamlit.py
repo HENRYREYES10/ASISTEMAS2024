@@ -3,6 +3,9 @@ import datetime
 from collections import Counter
 import streamlit as st
 from docx import Document
+from docx.shared import Pt
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from io import BytesIO
 
 # Función para leer los logs desde el archivo subidodefleer_logs(file):
@@ -72,6 +75,19 @@ from io import BytesIO
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+# Función para añadir bordes a una tabla en Worddefagregar_bordes_tabla(tabla):
+    tbl = tabla._tbl  # Obtener la tabla OXMLfor cell in tbl.iter_tcs():
+        tcPr = cell.get_or_add_tcPr()
+        tcBorders = OxmlElement('w:tcBorders')
+        for border_name in ['top', 'left', 'bottom', 'right']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')  # Tamaño del borde
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '000000')  # Color del borde (negro)
+            tcBorders.append(border)
+        tcPr.append(tcBorders)
+
 # Función para generar el informe de auditoría en formato Worddefgenerar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
     
@@ -124,7 +140,9 @@ from io import BytesIO
     doc.add_paragraph("A continuación se detallan los errores más comunes encontrados:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Error'
-    table.cell(0, 1).text = 'Ocurrencias'for error, ocurrencias in resumen['Errores más comunes']:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for error, ocurrencias in resumen['Errores más comunes']:
         row = table.add_row().cells
         row[0].text = error
         row[1].text = str(ocurrencias)
@@ -135,7 +153,9 @@ from io import BytesIO
     doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción de la Advertencia'
-    table.cell(0, 1).text = 'Ocurrencias'for advertencia, ocurrencias in resumen['Advertencias más comunes']:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
         row = table.add_row().cells
         row[0].text = advertencia
         row[1].text = str(ocurrencias)
@@ -146,7 +166,9 @@ from io import BytesIO
     doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Evento Crítico'
-    table.cell(0, 1).text = 'Ocurrencias'for evento, ocurrencias in resumen['Eventos críticos más comunes']:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
         row = table.add_row().cells
         row[0].text = evento
         row[1].text = str(ocurrencias)
@@ -157,7 +179,9 @@ from io import BytesIO
     doc.add_paragraph("Frecuencia de Errores por Hora:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Errores'for hora, frecuencia insorted(resumen['Frecuencia de errores por hora'].items()):
+    table.cell(0, 1).text = 'Errores'
+    agregar_bordes_tabla(table)
+    for hora, frecuencia insorted(resumen['Frecuencia de errores por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
@@ -165,7 +189,9 @@ from io import BytesIO
     doc.add_paragraph("Frecuencia de Advertencias por Hora:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Advertencias'for hora, frecuencia insorted(resumen['Frecuencia de advertencias por hora'].items()):
+    table.cell(0, 1).text = 'Advertencias'
+    agregar_bordes_tabla(table)
+    for hora, frecuencia insorted(resumen['Frecuencia de advertencias por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
@@ -173,7 +199,9 @@ from io import BytesIO
     doc.add_paragraph("Frecuencia de Eventos Críticos por Hora:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Eventos Críticos'for hora, frecuencia insorted(resumen['Frecuencia de eventos críticos por hora'].items()):
+    table.cell(0, 1).text = 'Eventos Críticos'
+    agregar_bordes_tabla(table)
+    for hora, frecuencia insorted(resumen['Frecuencia de eventos críticos por hora'].items()):
         row = table.add_row().cells
         row[0].text = f"{hora}:00"
         row[1].text = str(frecuencia)
@@ -189,7 +217,9 @@ from io import BytesIO
     doc.add_heading("Errores:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'for log, explicacion in errores:
+    table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    for log, explicacion in errores:
         row = table.add_row().cells
         row[0].text = log
         row[1].text = explicacion
@@ -197,7 +227,9 @@ from io import BytesIO
     doc.add_heading("Advertencias:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'for log, explicacion in advertencias:
+    table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    for log, explicacion in advertencias:
         row = table.add_row().cells
         row[0].text = log
         row[1].text = explicacion
@@ -205,7 +237,9 @@ from io import BytesIO
     doc.add_heading("Eventos Críticos:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'for log, explicacion in eventos_criticos:
+    table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    for log, explicacion in eventos_criticos:
         row = table.add_row().cells
         row[0].text = log
         row[1].text = explicacion
