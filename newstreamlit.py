@@ -113,48 +113,36 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar gráficos
-def generar_grafico_frecuencia(resumen):
-    fig, ax = plt.subplots(1, 3, figsize=(15, 5))
+# Función para generar un gráfico de frecuencias
+def generar_grafico_frecuencia(frecuencias, titulo):
+    horas, ocurrencias = zip(*sorted(frecuencias.items()))
     
-    # Gráfico de errores por hora
-    horas, frecuencias = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
-    ax[0].bar(horas, frecuencias)
-    ax[0].set_title("Frecuencia de Errores por Hora")
-    ax[0].set_xlabel("Hora")
-    ax[0].set_ylabel("Errores")
-
-    # Gráfico de advertencias por hora
-    horas, frecuencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
-    ax[1].bar(horas, frecuencias, color='orange')
-    ax[1].set_title("Frecuencia de Advertencias por Hora")
-    ax[1].set_xlabel("Hora")
-    ax[1].set_ylabel("Advertencias")
-
-    # Gráfico de eventos críticos por hora
-    horas, frecuencias = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
-    ax[2].bar(horas, frecuencias, color='red')
-    ax[2].set_title("Frecuencia de Eventos Críticos por Hora")
-    ax[2].set_xlabel("Hora")
-    ax[2].set_ylabel("Eventos Críticos")
-
+    plt.figure(figsize=(10, 5))
+    plt.bar(horas, ocurrencias, color='skyblue')
+    plt.xlabel('Hora del Día')
+    plt.ylabel('Número de Eventos')
+    plt.title(titulo)
+    plt.xticks(rotation=45)
     plt.tight_layout()
     
-    # Guardar gráfico en buffer
+    # Guardar el gráfico en un buffer en memoria
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
+    plt.close()
     
     return buffer
 
-# Función para añadir el gráfico al informe
+# Función para añadir un gráfico al informe Word
 def agregar_grafico_al_informe(doc, resumen):
-    buffer = generar_grafico_frecuencia(resumen)
-    doc.add_heading("Distribución Temporal de Eventos - Gráficos", level=2)
-    doc.add_paragraph("A continuación se presenta un análisis visual de la distribución temporal de los eventos registrados:")
+    doc.add_heading("Gráficos de Frecuencia", level=2)
     
-    doc.add_picture(buffer, width=docx.shared.Inches(6))
-    buffer.close()
+    for tipo in ['Frecuencia de errores por hora', 'Frecuencia de advertencias por hora', 'Frecuencia de eventos críticos por hora']:
+        if resumen[tipo]:
+            titulo = tipo.replace('Frecuencia de ', '').capitalize()
+            buffer = generar_grafico_frecuencia(resumen[tipo], titulo)
+            doc.add_paragraph(titulo)
+            doc.add_picture(buffer)
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -259,36 +247,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
     agregar_grafico_al_informe(doc, resumen)
-    
-    doc.add_paragraph("Frecuencia de Errores por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Errores'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de errores por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Advertencias por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Advertencias'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de advertencias por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Eventos Críticos por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Eventos Críticos'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de eventos críticos por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
     doc.add_paragraph("\n")
     
     # Patrones Recurrentes
