@@ -65,7 +65,7 @@ def combinar_resultados(resultados):
     combinados = {'ERROR': [], 'WARNING': [], 'CRITICAL': [], 'OTROS': []}
     
     for resultado en resultados:
-        for clave in combinados:
+        for clave en combinados:
             combinados[clave].extend(resultado[clave])
     
     return combinados
@@ -77,14 +77,14 @@ def generar_resumen(categorias):
         return partes[-1] if len(partes) > 1 else "Desconocido"
     
     resumen = {
-        'Total de logs': sum(len(categorias[clave]) for clave in categorias),
+        'Total de logs': sum(len(categorias[clave]) for clave en categorias),
         'Errores': len(categorias['ERROR']),
         'Advertencias': len(categorias['WARNING']),
         'Eventos críticos': len(categorias['CRITICAL']),
         'Otros eventos': len(categorias['OTROS']),
     }
 
-    for clave in ['ERROR', 'WARNING', 'CRITICAL']:
+    for clave en ['ERROR', 'WARNING', 'CRITICAL']:
         resumen[f'{clave.lower()} más comunes'] = Counter(
             obtener_ultima_palabra(log[0]) for log in categorias[clave]
         ).most_common(5)
@@ -118,26 +118,34 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
+def agregar_parrafo_formateado(doc, texto, bold=False, italic=False, font_size=12):
+    """Agrega un párrafo formateado al documento de Word."""
+    parrafo = doc.add_paragraph()
+    run = parrafo.add_run(texto)
+    run.bold = bold
+    run.italic = italic
+    run.font.size = Pt(font_size)
+
 def generar_informe_word(resumen, categorias):
     """Genera un informe de auditoría en formato Word."""
     doc = Document()
 
     # Crear la portada del documento
     doc.add_heading("INFORME DE AUDITORÍA DE LOGS DEL SISTEMA", level=1)
-    doc.add_paragraph(f"Fecha de Generación: {resumen['Fecha del resumen']}")
-    doc.add_paragraph(f"Total de Logs Analizados: {resumen['Total de logs']}")
+    agregar_parrafo_formateado(doc, f"Fecha de Generación: {resumen['Fecha del resumen']}", bold=True)
+    agregar_parrafo_formateado(doc, f"Total de Logs Analizados: {resumen['Total de logs']}", bold=True)
     doc.add_paragraph("\n")
 
     # Añadir datos del auditor
     doc.add_heading("Datos del Auditor", level=2)
-    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
-    doc.add_paragraph("Cargo: Auditor de Sistemas")
-    doc.add_paragraph(f"Fecha del Informe: {resumen['Fecha del resumen']}")
+    agregar_parrafo_formateado(doc, "Nombre del Auditor: [Nombre del Auditor]", bold=True)
+    agregar_parrafo_formateado(doc, "Cargo: Auditor de Sistemas", bold=True)
+    agregar_parrafo_formateado(doc, f"Fecha del Informe: {resumen['Fecha del resumen']}", bold=True)
     doc.add_paragraph("\n")
 
     # Introducción y objetivo de la auditoría
     doc.add_heading("Introducción", level=2)
-    doc.add_paragraph(
+    agregar_parrafo_formateado(doc,
         "Los logs son registros detallados de eventos que ocurren dentro de un sistema. "
         "Estos registros son fundamentales para la monitorización, diagnóstico y auditoría "
         "del sistema, proporcionando un rastro de actividades que permite a los administradores "
@@ -148,39 +156,43 @@ def generar_informe_word(resumen, categorias):
     )
 
     doc.add_heading("Objetivo de la Prueba", level=2)
-    doc.add_paragraph(
+    agregar_parrafo_formateado(doc,
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis "
         "de los logs generados, identificar patrones de comportamiento anómalo, y determinar las áreas "
         "que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
 
-    # Añadir el índice
+    # Añadir índice
     doc.add_heading("Índice", level=2)
-    for i, seccion in enumerate([
-        "Resumen Ejecutivo", "Análisis de Errores", "Análisis de Advertencias", 
-        "Análisis de Eventos Críticos", "Distribución Temporal de Eventos", 
-        "Patrones Recurrentes", "Detalles de Errores, Advertencias y Eventos Críticos", 
-        "Conclusiones y Recomendaciones", "Firmas"], 1):
-        doc.add_paragraph(f"{i}. {seccion}")
-
+    agregar_parrafo_formateado(doc, "1. Resumen Ejecutivo")
+    agregar_parrafo_formateado(doc, "2. Análisis de Errores")
+    agregar_parrafo_formateado(doc, "3. Análisis de Advertencias")
+    agregar_parrafo_formateado(doc, "4. Análisis de Eventos Críticos")
+    agregar_parrafo_formateado(doc, "5. Distribución Temporal de Eventos")
+    agregar_parrafo_formateado(doc, "6. Patrones Recurrentes")
+    agregar_parrafo_formateado(doc, "7. Detalles de Errores, Advertencias y Eventos Críticos")
+    agregar_parrafo_formateado(doc, "8. Conclusiones y Recomendaciones")
+    agregar_parrafo_formateado(doc, "9. Firmas")
     doc.add_paragraph("\n")
 
     # Resumen Ejecutivo
     doc.add_heading("1. Resumen Ejecutivo", level=2)
-    doc.add_paragraph(f"Se analizaron un total de {resumen['Total de logs']} logs, de los cuales {resumen['Errores']} "
-                      f"fueron clasificados como errores, {resumen['Advertencias']} como advertencias y "
-                      f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó "
-                      f"varios problemas críticos que requieren atención inmediata.")
-    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos "
-                      "mediante la identificación de palabras clave en los registros. Se generaron resúmenes "
-                      "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
+    agregar_parrafo_formateado(doc, 
+        f"Se analizaron un total de {resumen['Total de logs']} logs, de los cuales {resumen['Errores']} "
+        f"fueron clasificados como errores, {resumen['Advertencias']} como advertencias y "
+        f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó "
+        f"varios problemas críticos que requieren atención inmediata.")
+    agregar_parrafo_formateado(doc, 
+        "Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos "
+        "mediante la identificación de palabras clave en los registros. Se generaron resúmenes "
+        "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
     doc.add_paragraph("\n")
 
-    # Añadir las secciones de análisis de errores, advertencias y eventos críticos
+    # Análisis Detallado de Errores, Advertencias y Eventos Críticos
     for categoria, nombre in [('ERROR', 'Errores'), ('WARNING', 'Advertencias'), ('CRITICAL', 'Eventos Críticos')]:
         doc.add_heading(f"2. Análisis de {nombre}", level=2)
-        doc.add_paragraph(f"A continuación se detallan los {nombre.lower()} más comunes encontrados:")
+        agregar_parrafo_formateado(doc, f"A continuación se detallan los {nombre.lower()} más comunes encontrados:")
         table = doc.add_table(rows=1, cols=2)
         table.cell(0, 0).text = f'Descripción del {nombre[:-1]}'
         table.cell(0, 1).text = 'Ocurrencias'
@@ -193,10 +205,10 @@ def generar_informe_word(resumen, categorias):
 
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    for clave, nombre in [('Frecuencia de errores por hora', 'Errores'), 
+    for clave, nombre en [('Frecuencia de errores por hora', 'Errores'), 
                           ('Frecuencia de advertencias por hora', 'Advertencias'), 
                           ('Frecuencia de eventos críticos por hora', 'Eventos Críticos')]:
-        doc.add_paragraph(f"Frecuencia de {nombre} por Hora:")
+        agregar_parrafo_formateado(doc, f"Frecuencia de {nombre} por Hora:")
         table = doc.add_table(rows=1, cols=2)
         table.cell(0, 0).text = 'Hora'
         table.cell(0, 1).text = nombre
@@ -209,7 +221,10 @@ def generar_informe_word(resumen, categorias):
 
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
-    doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
+    agregar_parrafo_formateado(doc, 
+        "En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo. "
+        "Estos patrones pueden indicar problemas subyacentes que requieren una atención especial para mejorar la estabilidad "
+        "y seguridad del sistema.")
     
     # Detalles Específicos
     doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
@@ -228,7 +243,7 @@ def generar_informe_word(resumen, categorias):
 
     # Conclusiones y Recomendaciones
     doc.add_heading("8. Conclusiones y Recomendaciones", level=2)
-    doc.add_paragraph(
+    agregar_parrafo_formateado(doc, 
         "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. "
         "Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. "
         "Se recomienda una revisión exhaustiva de los componentes del sistema implicados en los errores más comunes, así como la implementación de mejores prácticas "
@@ -237,8 +252,8 @@ def generar_informe_word(resumen, categorias):
 
     # Firma del Auditor
     doc.add_heading("9. Firmas", level=2)
-    doc.add_paragraph("Firma del Auditor: __________________________")
-    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    agregar_parrafo_formateado(doc, "Firma del Auditor: __________________________")
+    agregar_parrafo_formateado(doc, "Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("\n")
 
     # Guardar el documento en un buffer en memoria
