@@ -8,7 +8,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
 import matplotlib.pyplot as plt
-from tempfile import NamedTemporaryFile
+import matplotlib.ticker as ticker
 
 # Función para leer los logs desde el archivo subido
 def leer_logs(file):
@@ -114,35 +114,33 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar gráficos de frecuencia
 def generar_grafico_frecuencia(resumen):
     horas, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
-    _, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
-    _, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
+    horas, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
+    horas, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
 
-    plt.figure(figsize=(10, 6))
-    plt.plot(horas, frecuencias_errores, label='Errores', marker='o')
-    plt.plot(horas, frecuencias_advertencias, label='Advertencias', marker='o')
-    plt.plot(horas, frecuencias_criticos, label='Eventos Críticos', marker='o')
-    plt.xlabel('Hora')
-    plt.ylabel('Frecuencia')
-    plt.title('Frecuencia de Eventos por Hora')
-    plt.legend()
-    plt.grid(True)
+    # Graficar solo si las dimensiones coinciden
+    if len(horas) == len(frecuencias_errores) == len(frecuencias_advertencias) == len(frecuencias_criticos):
+        plt.figure(figsize=(10, 6))
+        plt.plot(horas, frecuencias_errores, label='Errores', marker='o')
+        plt.plot(horas, frecuencias_advertencias, label='Advertencias', marker='x')
+        plt.plot(horas, frecuencias_criticos, label='Eventos Críticos', marker='s')
+        plt.xlabel('Hora')
+        plt.ylabel('Frecuencia')
+        plt.title('Frecuencia de Errores, Advertencias y Eventos Críticos por Hora')
+        plt.legend()
+        plt.grid(True)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
 
-    temp_file = NamedTemporaryFile(delete=False, suffix=".png")
-    plt.savefig(temp_file.name)
-    plt.close()
-    
-    return temp_file.name
-
-# Función para agregar gráficos al informe
-def agregar_grafico_al_informe(doc, resumen):
-    doc.add_heading("6. Gráficos de Frecuencia de Eventos", level=2)
-    grafico_path = generar_grafico_frecuencia(resumen)
-    doc.add_paragraph("A continuación se presentan los gráficos de frecuencia de eventos por hora.")
-    doc.add_picture(grafico_path, width=Pt(400))
-    os.remove(grafico_path)
+        buffer = BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        plt.close()
+        return buffer
+    else:
+        st.error("Las dimensiones de los datos para los gráficos no coinciden.")
+        return None
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -189,10 +187,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("4. Análisis de Eventos Críticos")
     doc.add_paragraph("5. Distribución Temporal de Eventos")
     doc.add_paragraph("6. Patrones Recurrentes")
-    doc.add_paragraph("7. Gráficos de Frecuencia de Eventos")
-    doc.add_paragraph("8. Detalles de Errores, Advertencias y Eventos Críticos")
-    doc.add_paragraph("9. Conclusiones y Recomendaciones")
-    doc.add_paragraph("10. Firmas")
+    doc.add_paragraph("7. Detalles de Errores, Advertencias y Eventos Críticos")
+    doc.add_paragraph("8. Conclusiones y Recomendaciones")
+    doc.add_paragraph("9. Firmas")
     doc.add_paragraph("\n")
     
     # Resumen Ejecutivo
@@ -247,43 +244,14 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    doc.add_paragraph("Frecuencia de Errores por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Errores'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de errores por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Advertencias por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Advertencias'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de advertencias por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    
-    doc.add_paragraph("Frecuencia de Eventos Críticos por Hora:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Hora'
-    table.cell(0, 1).text = 'Eventos Críticos'
-    agregar_bordes_tabla(table)
-    for hora, frecuencia in sorted(resumen['Frecuencia de eventos críticos por hora'].items()):
-        row = table.add_row().cells
-        row[0].text = f"{hora}:00"
-        row[1].text = str(frecuencia)
-    doc.add_paragraph("\n")
+    grafico_frecuencia = generar_grafico_frecuencia(resumen)
+    if grafico_frecuencia:
+        doc.add_heading("Distribución Temporal de Eventos", level=3)
+        doc.add_picture(grafico_frecuencia, width=Pt(450))
     
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
     doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
-    
-    # Gráficos de Frecuencia
-    agregar_grafico_al_informe(doc, resumen)
     
     # Detalles Específicos
     doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
