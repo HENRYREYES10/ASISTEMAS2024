@@ -113,36 +113,33 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar un gráfico de frecuencias
-def generar_grafico_frecuencia(frecuencias, titulo):
-    horas, ocurrencias = zip(*sorted(frecuencias.items()))
+# Función para generar un gráfico de frecuencia
+def generar_grafico_frecuencia(resumen):
+    horas_errores, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
+    horas_advertencias, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
+    horas_criticos, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
     
-    plt.figure(figsize=(10, 5))
-    plt.bar(horas, ocurrencias, color='skyblue')
-    plt.xlabel('Hora del Día')
-    plt.ylabel('Número de Eventos')
-    plt.title(titulo)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    
-    # Guardar el gráfico en un buffer en memoria
+    plt.figure(figsize=(10, 6))
+    plt.plot(horas_errores, frecuencias_errores, marker='o', label='Errores')
+    plt.plot(horas_advertencias, frecuencias_advertencias, marker='o', label='Advertencias')
+    plt.plot(horas_criticos, frecuencias_criticos, marker='o', label='Eventos Críticos')
+    plt.xlabel('Hora')
+    plt.ylabel('Frecuencia')
+    plt.title('Frecuencia de Errores, Advertencias y Eventos Críticos por Hora')
+    plt.legend()
+    plt.grid(True)
+
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
-    plt.close()
     
     return buffer
 
-# Función para añadir un gráfico al informe Word
+# Función para agregar el gráfico al informe
 def agregar_grafico_al_informe(doc, resumen):
-    doc.add_heading("Gráficos de Frecuencia", level=2)
-    
-    for tipo in ['Frecuencia de errores por hora', 'Frecuencia de advertencias por hora', 'Frecuencia de eventos críticos por hora']:
-        if resumen[tipo]:
-            titulo = tipo.replace('Frecuencia de ', '').capitalize()
-            buffer = generar_grafico_frecuencia(resumen[tipo], titulo)
-            doc.add_paragraph(titulo)
-            doc.add_picture(buffer)
+    doc.add_heading("Gráfico de Frecuencia por Hora", level=2)
+    grafico = generar_grafico_frecuencia(resumen)
+    doc.add_picture(grafico, width=Pt(400))
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -247,7 +244,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
     agregar_grafico_al_informe(doc, resumen)
-    doc.add_paragraph("\n")
     
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
