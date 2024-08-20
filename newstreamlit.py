@@ -115,14 +115,29 @@ def agregar_bordes_tabla(tabla):
 
 # Función para generar un gráfico de frecuencia
 def generar_grafico_frecuencia(resumen):
-    horas_errores, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
-    horas_advertencias, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
-    horas_criticos, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
-    
+    try:
+        horas_errores, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
+    except ValueError:
+        horas_errores, frecuencias_errores = [], []
+
+    try:
+        horas_advertencias, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
+    except ValueError:
+        horas_advertencias, frecuencias_advertencias = [], []
+
+    try:
+        horas_criticos, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
+    except ValueError:
+        horas_criticos, frecuencias_criticos = [], []
+
     plt.figure(figsize=(10, 6))
-    plt.plot(horas_errores, frecuencias_errores, marker='o', label='Errores')
-    plt.plot(horas_advertencias, frecuencias_advertencias, marker='o', label='Advertencias')
-    plt.plot(horas_criticos, frecuencias_criticos, marker='o', label='Eventos Críticos')
+    if horas_errores:
+        plt.plot(horas_errores, frecuencias_errores, marker='o', label='Errores')
+    if horas_advertencias:
+        plt.plot(horas_advertencias, frecuencias_advertencias, marker='o', label='Advertencias')
+    if horas_criticos:
+        plt.plot(horas_criticos, frecuencias_criticos, marker='o', label='Eventos Críticos')
+
     plt.xlabel('Hora')
     plt.ylabel('Frecuencia')
     plt.title('Frecuencia de Errores, Advertencias y Eventos Críticos por Hora')
