@@ -3,7 +3,9 @@ import datetime
 from collections import Counter
 import streamlit as st
 from docx import Document
-from docx.shared import Inches
+from docx.shared import Pt, Inches
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
 from io import BytesIO
 import matplotlib.pyplot as plt
 
@@ -96,34 +98,39 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-def generar_grafico_frecuencia(resumen, tipo):
-    """Genera un gráfico de frecuencia para el tipo de evento indicado."""
-    if tipo == "Errores":
-        horas, frecuencias = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
-        label = 'Errores'
-    elif tipo == "Advertencias":
-        horas, frecuencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
-        label = 'Advertencias'
-    elif tipo == "Eventos Críticos":
-        horas, frecuencias = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
-        label = 'Eventos Críticos'
-    
-    if len(horas) == len(frecuencias):
-        plt.figure(figsize=(10, 6))
-        plt.plot(horas, frecuencias, marker='o', label=label)
-        plt.title(f"Distribución de {label} por Hora")
+# Función para añadir bordes a una tabla en Word
+def agregar_bordes_tabla(tabla):
+    tbl = tabla._tbl  # Obtener la tabla OXML
+    for cell in tbl.iter_tcs():
+        tcPr = cell.get_or_add_tcPr()
+        tcBorders = OxmlElement('w:tcBorders')
+        for border_name in ['top', 'left', 'bottom', 'right']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')  # Tamaño del borde
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '000000')  # Color del borde (negro)
+            tcBorders.append(border)
+        tcPr.append(tcBorders)
+
+# Función para generar gráficos de frecuencia
+def generar_grafico_frecuencia(resumen, tipo_evento):
+    try:
+        horas, frecuencias = zip(*sorted(resumen[f'Frecuencia de {tipo_evento.lower()} por hora'].items()))
+        plt.figure(figsize=(10, 5))
+        plt.plot(horas, frecuencias, marker='o')
+        plt.title(f'Frecuencia de {tipo_evento} por Hora')
         plt.xlabel('Hora')
         plt.ylabel('Frecuencia')
-        plt.legend()
         plt.grid(True)
-        
-        # Guardar el gráfico en un buffer
+
+        # Guardar la figura en un buffer en memoria
         buffer = BytesIO()
         plt.savefig(buffer, format='png')
         buffer.seek(0)
         plt.close()
         return buffer
-    else:
+    except ValueError as ve:
         st.error("Las dimensiones de los datos para los gráficos no coinciden.")
         return None
 
@@ -194,6 +201,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Error'
     table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
     for error, ocurrencias in resumen['Errores más comunes']:
         row = table.add_row().cells
         row[0].text = error
@@ -206,6 +214,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción de la Advertencia'
     table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
     for advertencia, ocurrencias in resumen['Advertencias más comunes']:
         row = table.add_row().cells
         row[0].text = advertencia
@@ -218,6 +227,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Evento Crítico'
     table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
     for evento, ocurrencias in resumen['Eventos críticos más comunes']:
         row = table.add_row().cells
         row[0].text = evento
@@ -226,15 +236,14 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    
-    for tipo in ["Errores", "Advertencias", "Eventos Críticos"]:
-        grafico = generar_grafico_frecuencia(resumen, tipo)
+
+    for tipo_evento in ['Errores', 'Advertencias', 'Eventos críticos']:
+        grafico = generar_grafico_frecuencia(resumen, tipo_evento)
         if grafico:
-            doc.add_heading(f"Distribución de {tipo} por Hora", level=3)
+            doc.add_heading(f"Distribución de {tipo_evento} por Hora", level=3)
             doc.add_picture(grafico, width=Inches(6))
-    
-    doc.add_paragraph("\n")
-    
+            doc.add_paragraph("\n")
+
     # Patrones Recurrentes
     doc.add_heading("6. Patrones Recurrentes", level=2)
     doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
@@ -246,6 +255,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
     table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
     for log, explicacion in errores:
         row = table.add_row().cells
         row[0].text = log
@@ -255,6 +265,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
     table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
     for log, explicacion in advertencias:
         row = table.add_row().cells
         row[0].text = log
@@ -264,6 +275,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
     table.cell(0, 1).text = 'Explicación'
+    agregar_bordes_tabla(table)
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
         row[0].text = log
