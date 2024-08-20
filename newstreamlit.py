@@ -3,7 +3,7 @@ import datetime
 from collections import Counter
 import streamlit as st
 from docx import Document
-from docx.shared import Pt, Inches  # Asegúrate de importar Inches
+from docx.shared import Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
@@ -98,6 +98,24 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
+# Función para generar un gráfico de frecuencia
+def generar_grafico_frecuencia(datos, titulo):
+    horas = sorted(datos.keys())
+    frecuencias = [datos[hora] for hora in horas]
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(horas, frecuencias, marker='o')
+    plt.title(titulo)
+    plt.xlabel('Hora')
+    plt.ylabel('Frecuencia')
+    plt.grid(True)
+
+    grafico_path = f"{titulo.replace(' ', '_')}.png"
+    plt.savefig(grafico_path)
+    plt.close()
+
+    return grafico_path
+
 # Función para añadir bordes a una tabla en Word
 def agregar_bordes_tabla(tabla):
     tbl = tabla._tbl  # Obtener la tabla OXML
@@ -112,38 +130,6 @@ def agregar_bordes_tabla(tabla):
             border.set(qn('w:color'), '000000')  # Color del borde (negro)
             tcBorders.append(border)
         tcPr.append(tcBorders)
-
-# Función para agregar gráficos al informe de Word
-def agregar_grafico_al_informe(doc, resumen):
-    # Crear gráfico de frecuencia de errores
-    grafico_path = generar_grafico_frecuencia(resumen)
-    doc.add_heading("Distribución de Errores por Hora", level=3)
-    doc.add_picture(grafico_path, width=Inches(6))
-    os.remove(grafico_path)
-
-def generar_grafico_frecuencia(resumen):
-    horas, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
-    horas, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
-    horas, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
-    
-    if len(horas) != len(frecuencias_errores) or len(horas) != len(frecuencias_advertencias) or len(horas) != len(frecuencias_criticos):
-        st.error("Las dimensiones de los datos para los gráficos no coinciden.")
-        return None
-    
-    plt.figure(figsize=(10, 5))
-    plt.plot(horas, frecuencias_errores, label='Errores', marker='o')
-    plt.plot(horas, frecuencias_advertencias, label='Advertencias', marker='o')
-    plt.plot(horas, frecuencias_criticos, label='Eventos Críticos', marker='o')
-    plt.xlabel('Hora')
-    plt.ylabel('Frecuencia')
-    plt.title('Distribución de Eventos por Hora')
-    plt.legend()
-    
-    grafico_path = 'grafico_frecuencia.png'
-    plt.savefig(grafico_path)
-    plt.close()
-    
-    return grafico_path
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -247,7 +233,23 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    agregar_grafico_al_informe(doc, resumen)
+    
+    # Gráficos
+    if resumen['Frecuencia de errores por hora']:
+        error_graph_path = generar_grafico_frecuencia(resumen['Frecuencia de errores por hora'], "Distribución de Errores por Hora")
+        doc.add_heading("Distribución de Errores por Hora", level=3)
+        doc.add_picture(error_graph_path, width=Inches(6))
+    
+    if resumen['Frecuencia de advertencias por hora']:
+        warning_graph_path = generar_grafico_frecuencia(resumen['Frecuencia de advertencias por hora'], "Distribución de Advertencias por Hora")
+        doc.add_heading("Distribución de Advertencias por Hora", level=3)
+        doc.add_picture(warning_graph_path, width=Inches(6))
+    
+    if resumen['Frecuencia de eventos críticos por hora']:
+        critical_graph_path = generar_grafico_frecuencia(resumen['Frecuencia de eventos críticos por hora'], "Distribución de Eventos Críticos por Hora")
+        doc.add_heading("Distribución de Eventos Críticos por Hora", level=3)
+        doc.add_picture(critical_graph_path, width=Inches(6))
+    
     doc.add_paragraph("\n")
     
     # Patrones Recurrentes
