@@ -3,11 +3,11 @@ import datetime
 from collections import Counter
 import streamlit as st
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, Inches  # Asegúrate de importar Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-import matplotlib.pyplot as plt
 from io import BytesIO
+import matplotlib.pyplot as plt
 
 # Función para leer los logs desde el archivo subido
 def leer_logs(file):
@@ -113,30 +113,37 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar un gráfico de frecuencias
-def generar_grafico_frecuencia(horas, frecuencias, label, title):
+# Función para agregar gráficos al informe de Word
+def agregar_grafico_al_informe(doc, resumen):
+    # Crear gráfico de frecuencia de errores
+    grafico_path = generar_grafico_frecuencia(resumen)
+    doc.add_heading("Distribución de Errores por Hora", level=3)
+    doc.add_picture(grafico_path, width=Inches(6))
+    os.remove(grafico_path)
+
+def generar_grafico_frecuencia(resumen):
+    horas, frecuencias_errores = zip(*sorted(resumen['Frecuencia de errores por hora'].items()))
+    horas, frecuencias_advertencias = zip(*sorted(resumen['Frecuencia de advertencias por hora'].items()))
+    horas, frecuencias_criticos = zip(*sorted(resumen['Frecuencia de eventos críticos por hora'].items()))
+    
+    if len(horas) != len(frecuencias_errores) or len(horas) != len(frecuencias_advertencias) or len(horas) != len(frecuencias_criticos):
+        st.error("Las dimensiones de los datos para los gráficos no coinciden.")
+        return None
+    
     plt.figure(figsize=(10, 5))
-    plt.plot(horas, frecuencias, marker='o', label=label)
-    plt.title(title)
+    plt.plot(horas, frecuencias_errores, label='Errores', marker='o')
+    plt.plot(horas, frecuencias_advertencias, label='Advertencias', marker='o')
+    plt.plot(horas, frecuencias_criticos, label='Eventos Críticos', marker='o')
     plt.xlabel('Hora')
     plt.ylabel('Frecuencia')
-    plt.xticks(rotation=45)
-    plt.grid(True)
+    plt.title('Distribución de Eventos por Hora')
     plt.legend()
-    buf = BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
+    
+    grafico_path = 'grafico_frecuencia.png'
+    plt.savefig(grafico_path)
     plt.close()
-    return buf
-
-# Función para añadir gráficos al informe
-def agregar_grafico_al_informe(doc, titulo, horas, frecuencias, label):
-    if len(horas) == len(frecuencias):
-        grafico = generar_grafico_frecuencia(horas, frecuencias, label, titulo)
-        doc.add_paragraph(titulo, style='Heading 2')
-        doc.add_picture(grafico, width=docx.shared.Inches(6))
-    else:
-        st.error("Las dimensiones de los datos para los gráficos no coinciden.")
+    
+    return grafico_path
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -240,23 +247,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Distribución Temporal de Eventos
     doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-    doc.add_paragraph("Frecuencia de Errores por Hora:")
-    agregar_grafico_al_informe(doc, "Distribución de Errores por Hora", 
-                               list(sorted(resumen['Frecuencia de errores por hora'].keys())), 
-                               list(sorted(resumen['Frecuencia de errores por hora'].values())), 
-                               label="Errores")
-    
-    doc.add_paragraph("Frecuencia de Advertencias por Hora:")
-    agregar_grafico_al_informe(doc, "Distribución de Advertencias por Hora", 
-                               list(sorted(resumen['Frecuencia de advertencias por hora'].keys())), 
-                               list(sorted(resumen['Frecuencia de advertencias por hora'].values())), 
-                               label="Advertencias")
-    
-    doc.add_paragraph("Frecuencia de Eventos Críticos por Hora:")
-    agregar_grafico_al_informe(doc, "Distribución de Eventos Críticos por Hora", 
-                               list(sorted(resumen['Frecuencia de eventos críticos por hora'].keys())), 
-                               list(sorted(resumen['Frecuencia de eventos críticos por hora'].values())), 
-                               label="Eventos Críticos")
+    agregar_grafico_al_informe(doc, resumen)
     doc.add_paragraph("\n")
     
     # Patrones Recurrentes
