@@ -3,11 +3,10 @@ import datetime
 from collections import Counter
 import streamlit as st
 from docx import Document
-from docx.shared import Pt, Inches
+from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from io import BytesIO
-import matplotlib.pyplot as plt
 
 # Función para leer los logs desde el archivo subido
 def leer_logs(file):
@@ -113,27 +112,6 @@ def agregar_bordes_tabla(tabla):
             tcBorders.append(border)
         tcPr.append(tcBorders)
 
-# Función para generar gráficos de frecuencia
-def generar_grafico_frecuencia(resumen, tipo_evento):
-    try:
-        horas, frecuencias = zip(*sorted(resumen[f'Frecuencia de {tipo_evento.lower()} por hora'].items()))
-        plt.figure(figsize=(10, 5))
-        plt.plot(horas, frecuencias, marker='o')
-        plt.title(f'Frecuencia de {tipo_evento} por Hora')
-        plt.xlabel('Hora')
-        plt.ylabel('Frecuencia')
-        plt.grid(True)
-
-        # Guardar la figura en un buffer en memoria
-        buffer = BytesIO()
-        plt.savefig(buffer, format='png')
-        buffer.seek(0)
-        plt.close()
-        return buffer
-    except ValueError as ve:
-        st.error("Las dimensiones de los datos para los gráficos no coinciden.")
-        return None
-
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
@@ -163,7 +141,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         "recomendaciones basadas en los hallazgos."
     )
     
-    doc.add_heading("Objetivo de la Prueba", level=2)
+    doc.add_heading("Objetivo de la Auditoría", level=2)
     doc.add_paragraph(
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis "
         "de los logs generados, identificar patrones de comportamiento anómalo, y determinar las áreas "
@@ -177,11 +155,10 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("2. Análisis de Errores")
     doc.add_paragraph("3. Análisis de Advertencias")
     doc.add_paragraph("4. Análisis de Eventos Críticos")
-    doc.add_paragraph("5. Distribución Temporal de Eventos")
-    doc.add_paragraph("6. Patrones Recurrentes")
-    doc.add_paragraph("7. Detalles de Errores, Advertencias y Eventos Críticos")
-    doc.add_paragraph("8. Conclusiones y Recomendaciones")
-    doc.add_paragraph("9. Firmas")
+    doc.add_paragraph("5. Patrones Recurrentes y Observaciones")
+    doc.add_paragraph("6. Detalles de Errores, Advertencias y Eventos Críticos")
+    doc.add_paragraph("7. Recomendaciones y Mejores Prácticas")
+    doc.add_paragraph("8. Firmas")
     doc.add_paragraph("\n")
     
     # Resumen Ejecutivo
@@ -192,12 +169,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
                       f"varios problemas críticos que requieren atención inmediata.")
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos "
                       "mediante la identificación de palabras clave en los registros. Se generaron resúmenes "
-                      "estadísticos y gráficos para visualizar la distribución de los problemas detectados.")
+                      "estadísticos para visualizar la distribución de los problemas detectados y se realizaron "
+                      "observaciones detalladas para cada tipo de evento.")
     doc.add_paragraph("\n")
     
     # Análisis de Errores
     doc.add_heading("2. Análisis de Errores", level=2)
-    doc.add_paragraph("A continuación se detallan los errores más comunes encontrados:")
+    doc.add_paragraph("A continuación se detallan los errores más comunes encontrados durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Error'
     table.cell(0, 1).text = 'Ocurrencias'
@@ -210,7 +188,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Análisis de Advertencias
     doc.add_heading("3. Análisis de Advertencias", level=2)
-    doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas:")
+    doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción de la Advertencia'
     table.cell(0, 1).text = 'Ocurrencias'
@@ -223,7 +201,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     
     # Análisis de Eventos Críticos
     doc.add_heading("4. Análisis de Eventos Críticos", level=2)
-    doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados:")
+    doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Evento Crítico'
     table.cell(0, 1).text = 'Ocurrencias'
@@ -234,27 +212,22 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
     
-    # Distribución Temporal de Eventos
-    doc.add_heading("5. Distribución Temporal de Eventos", level=2)
-
-    for tipo_evento in ['Errores', 'Advertencias', 'Eventos críticos']:
-        grafico = generar_grafico_frecuencia(resumen, tipo_evento)
-        if grafico:
-            doc.add_heading(f"Distribución de {tipo_evento} por Hora", level=3)
-            doc.add_picture(grafico, width=Inches(6))
-            doc.add_paragraph("\n")
-
-    # Patrones Recurrentes
-    doc.add_heading("6. Patrones Recurrentes", level=2)
-    doc.add_paragraph("En esta sección se identifican patrones recurrentes de errores y advertencias a lo largo del tiempo.")
+    # Patrones Recurrentes y Observaciones
+    doc.add_heading("5. Patrones Recurrentes y Observaciones", level=2)
+    doc.add_paragraph(
+        "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
+        "Específicamente, se observó que ciertos errores tienden a ocurrir en intervalos de tiempo similares, lo que podría indicar "
+        "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. Además, las advertencias "
+        "relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
+    )
     
     # Detalles Específicos
-    doc.add_heading("7. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
+    doc.add_heading("6. Detalles de Errores, Advertencias y Eventos Críticos", level=2)
     
     doc.add_heading("Errores:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'
+    table.cell(0, 1).text = 'Explicación Detallada'
     agregar_bordes_tabla(table)
     for log, explicacion in errores:
         row = table.add_row().cells
@@ -264,7 +237,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_heading("Advertencias:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'
+    table.cell(0, 1).text = 'Explicación Detallada'
     agregar_bordes_tabla(table)
     for log, explicacion in advertencias:
         row = table.add_row().cells
@@ -274,7 +247,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_heading("Eventos Críticos:", level=3)
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Log'
-    table.cell(0, 1).text = 'Explicación'
+    table.cell(0, 1).text = 'Explicación Detallada'
     agregar_bordes_tabla(table)
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
@@ -282,17 +255,22 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         row[1].text = explicacion
     doc.add_paragraph("\n")
     
-    # Conclusiones y Recomendaciones
-    doc.add_heading("8. Conclusiones y Recomendaciones", level=2)
+    # Recomendaciones y Mejores Prácticas
+    doc.add_heading("7. Recomendaciones y Mejores Prácticas", level=2)
     doc.add_paragraph(
-        "A partir del análisis de los logs, se identificaron varios problemas críticos que requieren atención inmediata. "
-        "Es fundamental implementar medidas correctivas para evitar que los errores detectados afecten la estabilidad y seguridad del sistema. "
-        "Se recomienda una revisión exhaustiva de los componentes del sistema implicados en los errores más comunes, así como la implementación de mejores prácticas "
-        "para la monitorización y el mantenimiento preventivo."
+        "En base a los resultados de la auditoría, se sugieren las siguientes recomendaciones para mejorar la estabilidad y seguridad del sistema:\n"
+        "1. **Revisión de la Infraestructura:** Evaluar la infraestructura del sistema para identificar posibles cuellos de botella, "
+        "especialmente aquellos que podrían estar causando sobrecargas o fallos de conexión a la base de datos.\n"
+        "2. **Monitoreo de Seguridad:** Implementar sistemas de monitoreo de seguridad más robustos para detectar intentos de acceso no autorizados "
+        "y brechas de seguridad antes de que puedan ser explotadas.\n"
+        "3. **Optimización de Recursos:** Revisar y optimizar el uso de los recursos del sistema, incluyendo memoria y espacio en disco, para evitar "
+        "futuros problemas relacionados con el rendimiento.\n"
+        "4. **Mantenimiento Preventivo:** Establecer un plan de mantenimiento preventivo que incluya revisiones periódicas de logs y auditorías "
+        "regulares para identificar y resolver problemas antes de que se conviertan en críticos."
     )
     
     # Firma del Auditor
-    doc.add_heading("9. Firmas", level=2)
+    doc.add_heading("8. Firmas", level=2)
     doc.add_paragraph("Firma del Auditor: __________________________")
     doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("\n")
