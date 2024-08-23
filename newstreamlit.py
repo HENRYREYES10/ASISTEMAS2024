@@ -30,51 +30,31 @@ def leer_logs(file):
 
 # Función para generar explicaciones detalladas y personalizadas para cada log
 def generar_explicacion(log):
-    message = log[1]
+    severity, message, timestamp = log
     if "Database connection failed" in message:
-        return "Fallo en la conexión con la base de datos. Esto podría deberse a credenciales incorrectas, un problema con la red, o el servicio de base de datos no está disponible."
+        return "Fallo en la conexión con la base de datos, posiblemente debido a credenciales incorrectas o problemas de red."
     elif "Unable to reach API endpoint" in message:
-        return "No se pudo comunicar con el endpoint de la API. Verifique la URL del endpoint, la conectividad de red y la disponibilidad del servicio."
+        return "Problema al acceder al endpoint de la API. Verifique la conectividad de red y la disponibilidad del endpoint."
     elif "Failed to back up database" in message:
-        return "La copia de seguridad falló. Posibles causas incluyen falta de espacio en disco, permisos insuficientes, o problemas con el servicio de respaldo."
+        return "Error al realizar la copia de seguridad de la base de datos. Verifique los permisos y el espacio en disco."
     elif "High memory usage detected" in message:
-        return "Uso elevado de memoria detectado. Revise los procesos en ejecución, posibles fugas de memoria o configuraciones inadecuadas de aplicaciones."
+        return "Uso elevado de memoria detectado. Podría estar relacionado con fugas de memoria o aplicaciones mal optimizadas."
     elif "Disk space low" in message:
-        return "Espacio en disco insuficiente. Se recomienda liberar espacio eliminando archivos innecesarios o ampliar la capacidad de almacenamiento."
+        return "El espacio en disco está por debajo del umbral de seguridad. Considere liberar espacio o expandir el almacenamiento."
     elif "Slow response time" in message:
-        return "El sistema responde lentamente. Podría ser debido a alta carga de CPU, cuellos de botella en el acceso a la base de datos, o problemas de red."
+        return "El sistema está experimentando tiempos de respuesta lentos, posiblemente debido a alta carga de trabajo o cuellos de botella."
     elif "System outage detected" in message:
-        return "Interrupción del sistema detectada. Verifique la integridad del hardware, la configuración de la red, y el estado de los servicios críticos."
+        return "Se detectó una interrupción del sistema. Investigue las causas para restaurar el servicio."
     elif "Security breach detected" in message:
-        return "Posible brecha de seguridad detectada. Revise los logs de acceso, cambie contraseñas comprometidas, y considere fortalecer las medidas de seguridad."
+        return "Se detectó una brecha de seguridad. Investigue los accesos recientes y refuerce las medidas de seguridad."
     elif "Application crash" in message:
-        return "Una aplicación se bloqueó. Revise los registros de la aplicación para identificar la causa del fallo y considere implementar mecanismos de recuperación."
+        return "Una aplicación se bloqueó inesperadamente. Revise los registros de error de la aplicación para más detalles."
     elif "User session timeout" in message:
-        return "La sesión del usuario expiró. Esto podría deberse a configuraciones de tiempo de espera muy bajas o a inactividad prolongada del usuario."
+        return "Tiempo de espera de sesión del usuario agotado. Esto podría ser debido a configuraciones de seguridad o inactividad del usuario."
     elif "Unauthorized access attempt" in message:
-        return "Intento de acceso no autorizado detectado. Revise los registros de seguridad para identificar al actor y considere aumentar las medidas de protección."
+        return "Intento de acceso no autorizado detectado. Investigue y refuerce las políticas de seguridad."
     elif "Server overload" in message:
-        return "El servidor está sobrecargado. Considere optimizar las aplicaciones, balancear la carga o aumentar los recursos del servidor."
-    elif "Data synchronization error" in message:
-        return "Error en la sincronización de datos. Verifique las conexiones de red, la consistencia de datos y los procesos de sincronización."
-    elif "API rate limit exceeded" in message:
-        return "Límite de tasa de API excedido. Optimice las llamadas a la API para evitar exceder los límites y considere implementar un manejo de tasas."
-    elif "Invalid input detected" in message:
-        return "Se ha detectado una entrada inválida. Asegúrese de que los datos introducidos cumplen con los formatos y requisitos esperados."
-    elif "Password reset requested" in message:
-        return "Solicitud de restablecimiento de contraseña detectada. Verifique si se trata de una solicitud legítima y si es necesario tomar medidas adicionales."
-    elif "Failed login attempt detected" in message:
-        return "Intento de inicio de sesión fallido detectado. Puede ser indicativo de intentos de acceso no autorizados o errores en la autenticación del usuario."
-    elif "Session timeout" in message:
-        return "Tiempo de sesión agotado. Los usuarios han sido desconectados por inactividad prolongada o debido a políticas de seguridad."
-    elif "Scheduled report generated" in message:
-        return "Un informe programado se ha generado correctamente. Revise el contenido para asegurar que los datos presentados son precisos y relevantes."
-    elif "Customer record updated" in message:
-        return "El registro de un cliente ha sido actualizado. Verifique los cambios para asegurar que se reflejan correctamente en el sistema."
-    elif "Data export completed" in message:
-        return "Exportación de datos completada. Revise el archivo exportado para confirmar que todos los datos necesarios están presentes y son correctos."
-    elif "User logged in successfully" in message:
-        return "Inicio de sesión exitoso. El usuario ha accedido al sistema correctamente."
+        return "El servidor está sobrecargado. Distribuya la carga o considere incrementar los recursos del servidor."
     else:
         return "Este evento registrado requiere una revisión detallada para determinar su impacto y causas exactas."
 
@@ -83,14 +63,12 @@ def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for log in logs:
-        severity = log[0]
-        message = log[1]
         explicacion = generar_explicacion(log)
-        if severity == 'ERROR':
+        if log[0] == 'ERROR':
             errores.append((log, explicacion))
-        elif severity == 'WARNING':
+        elif log[0] == 'WARNING':
             advertencias.append((log, explicacion))
-        elif severity == 'CRITICAL':
+        elif log[0] == 'CRITICAL':
             eventos_criticos.append((log, explicacion))
         else:
             otros_eventos.append((log, explicacion))
@@ -206,7 +184,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in errores:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Análisis de Advertencias
@@ -221,7 +199,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in advertencias:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Análisis de Eventos Críticos
@@ -236,7 +214,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Patrones Recurrentes y Observaciones
@@ -379,4 +357,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
