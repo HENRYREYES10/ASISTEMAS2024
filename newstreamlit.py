@@ -16,7 +16,6 @@ def leer_logs(file):
             return file.read().decode('latin-1').splitlines()
         elif file.name.endswith('.xlsx'):
             df = pd.read_excel(file)
-            # Usar tanto 'Severity' como 'Message' para análisis
             if 'Severity' in df.columns and 'Message' in df.columns:
                 return df[['Severity', 'Message']].values.tolist()
             else:
@@ -57,7 +56,6 @@ def generar_explicacion(log):
         return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
     else:
         return "Este evento registrado requiere una revisión detallada."
-
 # Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
@@ -114,46 +112,37 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
 
 # Función para añadir bordes a una tabla en Word
 def agregar_bordes_tabla(tabla):
-    tbl = tabla._tbl  # Obtener la tabla OXML
+    tbl = tabla._tbl
     for cell in tbl.iter_tcs():
         tcPr = cell.get_or_add_tcPr()
         tcBorders = OxmlElement('w:tcBorders')
         for border_name in ['top', 'left', 'bottom', 'right']:
             border = OxmlElement(f'w:{border_name}')
             border.set(qn('w:val'), 'single')
-            border.set(qn('w:sz'), '4')  # Tamaño del borde
+            border.set(qn('w:sz'), '4')
             border.set(qn('w:space'), '0')
-            border.set(qn('w:color'), '000000')  # Color del borde (negro)
+            border.set(qn('w:color'), '000000')
             tcBorders.append(border)
         tcPr.append(tcBorders)
-
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
     doc = Document()
-    
-    # Carátula
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
     doc.add_paragraph(f'Total de Logs Analizados: {total_logs}', style='Heading 3')
     doc.add_paragraph("\n")
-    
-    # Introducción y Objetivo
     doc.add_heading('Introducción', level=1)
     doc.add_paragraph(
         "Los logs son registros detallados de eventos que ocurren dentro de un sistema. Estos registros son fundamentales para la monitorización, "
         "diagnóstico y auditoría del sistema, proporcionando un rastro de actividades que permite a los administradores y desarrolladores "
         "identificar y resolver problemas, asegurar el cumplimiento normativo y mantener la seguridad del sistema."
     )
-    
     doc.add_heading('Objetivo de la Auditoría', level=1)
     doc.add_paragraph(
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
-    doc.add_paragraph("\n &#8203;:contentReference[oaicite:0]{index=0}&#8203;
-    )
-    
-    # Resumen Ejecutivo
+    doc.add_paragraph("\n")
     doc.add_heading('Resumen Ejecutivo', level=1)
     doc.add_paragraph(
         f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
@@ -200,7 +189,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         row[0].text = evento
         row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
-    
     # Patrones Recurrentes y Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
     doc.add_paragraph(
