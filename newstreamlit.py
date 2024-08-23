@@ -140,7 +140,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc = Document()
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
-    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}'
+    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}')
     doc.add_paragraph("\n")
 
     # Índice
