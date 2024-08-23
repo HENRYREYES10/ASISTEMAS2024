@@ -16,7 +16,9 @@ def leer_logs(file):
             return file.read().decode('latin-1').splitlines()
         elif file.name.endswith('.xlsx'):
             df = pd.read_excel(file)
-            if 'Severity' in df.columns and 'Message' in df.columns and 'Timestamp' in df.columns:
+            # Verifica si las columnas necesarias están presentes
+            if {'Severity', 'Message', 'Timestamp'}.issubset(df.columns):
+                # Convertir las columnas a lista de listas
                 return df[['Severity', 'Message', 'Timestamp']].values.tolist()
             else:
                 st.error("No se encontraron las columnas 'Severity', 'Message' o 'Timestamp' en el archivo.")
@@ -261,6 +263,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     buffer.seek(0)
     
     return buffer
+
 # Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
@@ -318,7 +321,6 @@ def main():
                 resultados.append(analizar_logs(logs))
         
         errores, advertencias, eventos_criticos, otros_eventos = combinar_resultados(resultados)
-        
         resumen = generar_resumen(errores, advertencias, eventos_criticos, otros_eventos)
         
         st.subheader("Resumen de Resultados")
@@ -333,3 +335,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
