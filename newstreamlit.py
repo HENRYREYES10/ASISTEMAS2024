@@ -192,9 +192,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in errores:
         row = table.add_row().cells
-        row[0].text = log[1]
-        row[1].text = log[2]
-        row[2].text = explicacion
+        row[0].text = str(log[1]) if len(log) > 1 and log[1] else "No disponible"
+        row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
+        row[2].text = str(explicacion)
 
     # Análisis de Advertencias
     doc.add_heading('Análisis de Advertencias', level=1)
@@ -207,9 +207,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in advertencias:
         row = table.add_row().cells
-        row[0].text = log[1]
-        row[1].text = log[2]
-        row[2].text = explicacion
+        row[0].text = str(log[1]) if len(log) > 1 and log[1] else "No disponible"
+        row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
+        row[2].text = str(explicacion)
 
     # Análisis de Eventos Críticos
     doc.add_heading('Análisis de Eventos Críticos', level=1)
@@ -222,9 +222,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
-        row[0].text = log[1]
-        row[1].text = log[2]
-        row[2].text = explicacion
+        row[0].text = str(log[1]) if len(log) > 1 and log[1] else "No disponible"
+        row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
+        row[2].text = str(explicacion)
 
     # Patrones Recurrentes y Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
@@ -263,7 +263,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     buffer.seek(0)
     
     return buffer
-
 # Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
