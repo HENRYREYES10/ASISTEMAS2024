@@ -81,8 +81,7 @@ def agregar_bordes_tabla(tabla):
     tbl = tabla._tbl
     for cell in tbl.iter_tcs():
         tcPr = cell.get_or_add_tcPr()
-        tcBorders = O
-        tcBorders = OxmlElement('w:tcBorders')
+        tcBorders = OxmlElement('w:tcBorders')  # Esto estaba incompleto o incorrecto
         for border_name in ['top', 'left', 'bottom', 'right']:
             border = OxmlElement(f'w:{border_name}')
             border.set(qn('w:val'), 'single')
