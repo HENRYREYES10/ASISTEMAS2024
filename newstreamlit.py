@@ -206,7 +206,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in errores:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = log[2]
+        row[1].text = str(log[2])
         row[2].text = explicacion
 
     # Análisis de Advertencias
@@ -221,7 +221,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in advertencias:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = log[2]
+        row[1].text = str(log[2])
         row[2].text = explicacion
 
     # Análisis de Eventos Críticos
@@ -236,7 +236,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = log[2]
+        row[1].text = str(log[2])
         row[2].text = explicacion
 
     # Patrones Recurrentes y Observaciones
@@ -306,6 +306,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     buffer.seek(0)
     
     return buffer
+
 # Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
@@ -321,14 +322,14 @@ def main():
         - Conexión fallida a la base de datos
         - Incapacidad para alcanzar endpoints de API
         - Errores de sincronización de datos
-        - Intentos de acceso no autorizados
+        - Intentos de acceso no autorizado
         - Sobrecargas del servidor
         - Y muchos más...
         
         ### Beneficios de la Auditoría de Logs
         Realizar una auditoría de logs proporciona una visión detallada de los eventos del sistema, permitiendo:
         - Identificar y corregir problemas críticos rápidamente.
-        - Mejorar la seguridad al detectar intentos de acceso no autorizados.
+        - Mejorar la seguridad al detectar intentos de acceso no autorizado.
         - Optimizar el rendimiento del sistema mediante la identificación de cuellos de botella.
         - Asegurar el cumplimiento normativo al mantener un registro detallado de todas las actividades.
         
@@ -378,3 +379,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
