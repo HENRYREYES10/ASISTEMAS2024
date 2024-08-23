@@ -1,55 +1,57 @@
-import pandas as pd
-import streamlit as st
-from docx import Document
-from docx.shared import Inches
-from io import BytesIO
+import os
 import datetime
 from collections import Counter
+import streamlit as st
+from docx import Document
+from docx.shared import Pt, Inches
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from io import BytesIO
+import pandas as pd
 
-# Función para leer los logs desde un archivo de Excel
-def leer_logs_excel(file):
+# Función para leer los logs desde el archivo subido
+def leer_logs(file):
     try:
-        df = pd.read_excel(file, engine='openpyxl')
-        
-        # Verificar si las columnas necesarias existen
-        if 'Log Message' not in df.columns:
-            st.error("El archivo no contiene la columna 'Log Message'.")
+        if file.name.endswith('.log'):
+            return file.read().decode('latin-1').splitlines()
+        elif file.name.endswith('.xlsx'):
+            df = pd.read_excel(file)
+            return df['Log Message'].tolist()  # Ajusta según la columna de tu Excel
+        else:
+            st.error("Formato de archivo no soportado. Suba un archivo .log o .xlsx")
             return []
-        
-        return df['Log Message'].tolist()
-        
     except Exception as e:
-        st.error(f"Error al leer el archivo de Excel: {e}")
+        st.error(f"Error al leer el archivo: {e}")
         return []
 
 # Función para generar explicaciones detalladas para cada tipo de log
 def generar_explicacion(log):
     if "Database connection failed" in log:
-        return "Fallo en la conexión con la base de datos."
+        return "Este error indica un fallo en la conexión con la base de datos. Es crucial verificar las credenciales y el estado del servicio de la base de datos."
     elif "Unable to reach API endpoint" in log:
-        return "No se pudo comunicar con el endpoint de la API."
+        return "Este error sugiere que el sistema no pudo comunicarse con el endpoint de la API. Verifique la conectividad de red y la disponibilidad del servicio."
     elif "Failed to back up database" in log:
-        return "La copia de seguridad de la base de datos falló."
+        return "La copia de seguridad de la base de datos falló. Esto podría deberse a problemas de espacio en disco o permisos insuficientes."
     elif "High memory usage detected" in log:
-        return "Uso elevado de memoria detectado."
+        return "El sistema ha detectado un uso elevado de memoria. Es recomendable revisar los procesos en ejecución y optimizar el uso de recursos."
     elif "Disk space low" in log:
-        return "Espacio en disco insuficiente."
+        return "El espacio en disco es insuficiente. Se recomienda liberar espacio o aumentar la capacidad del almacenamiento."
     elif "Slow response time" in log:
-        return "El tiempo de respuesta del sistema es lento."
+        return "El tiempo de respuesta del sistema es lento. Esto podría ser causado por una carga excesiva o cuellos de botella en el sistema."
     elif "System outage detected" in log:
-        return "Se ha detectado una interrupción del sistema."
+        return "Se ha detectado una interrupción del sistema. Es posible que haya fallas en el hardware o problemas de red que requieran atención inmediata."
     elif "Security breach detected" in log:
-        return "Posible brecha de seguridad detectada."
+        return "Se ha detectado una posible brecha de seguridad. Revise los accesos y tome medidas correctivas para proteger el sistema."
     elif "Application crash" in log:
-        return "Una aplicación se ha bloqueado inesperadamente."
+        return "Una aplicación se ha bloqueado inesperadamente. Es necesario revisar los registros de la aplicación para identificar la causa del fallo."
     elif "User session timeout" in log:
-        return "La sesión del usuario ha expirado."
+        return "La sesión del usuario ha expirado. Esto podría deberse a inactividad prolongada o a un problema en la configuración del tiempo de espera."
     elif "Unauthorized access attempt" in log:
-        return "Intento de acceso no autorizado detectado."
+        return "Se detectó un intento de acceso no autorizado. Se recomienda revisar los registros de seguridad y tomar medidas para fortalecer la protección."
     elif "Server overload" in log:
-        return "El servidor está sobrecargado."
+        return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
     else:
-        return "Evento registrado requiere revisión."
+        return "Este evento registrado requiere una revisión detallada."
 
 # Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
@@ -68,16 +70,55 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para combinar resultados de múltiples archivos de logs
+def combinar_resultados(resultados):
+    errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
+    
+    for resultado in resultados:
+        errores.extend(resultado[0])
+        advertencias.extend(resultado[1])
+        eventos_criticos.extend(resultado[2])
+        otros_eventos.extend(resultado[3])
+    
+    return errores, advertencias, eventos_criticos, otros_eventos
+
 # Función para generar un resumen estadístico de los logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
+    def obtener_ultima_palabra(log):
+        if isinstance(log, str):
+            partes = log.split(' ')
+            return partes[-1] if len(partes) > 1 else "Desconocido"
+        return "Desconocido"
+    
     return {
         'Total de logs': len(errores) + len(advertencias) + len(eventos_criticos) + len(otros_eventos),
         'Errores': len(errores),
         'Advertencias': len(advertencias),
         'Eventos críticos': len(eventos_criticos),
         'Otros eventos': len(otros_eventos),
+        'Errores más comunes': Counter([obtener_ultima_palabra(log[0]) for log in errores]).most_common(5),
+        'Advertencias más comunes': Counter([obtener_ultima_palabra(log[0]) for log in advertencias]).most_common(5),
+        'Eventos críticos más comunes': Counter([obtener_ultima_palabra(log[0]) for log in eventos_criticos]).most_common(5),
+        'Frecuencia de errores por hora': Counter([log[0].split(' ')[1] for log in errores if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
+        'Frecuencia de advertencias por hora': Counter([log[0].split(' ')[1] for log in advertencias if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
+        'Frecuencia de eventos críticos por hora': Counter([log[0].split(' ')[1] for log in eventos_criticos if isinstance(log[0], str) and len(log[0].split(' ')) > 1]),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
+
+# Función para añadir bordes a una tabla en Word
+def agregar_bordes_tabla(tabla):
+    tbl = tabla._tbl  # Obtener la tabla OXML
+    for cell in tbl.iter_tcs():
+        tcPr = cell.get_or_add_tcPr()
+        tcBorders = OxmlElement('w:tcBorders')
+        for border_name in ['top', 'left', 'bottom', 'right']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')  # Tamaño del borde
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '000000')  # Color del borde (negro)
+            tcBorders.append(border)
+        tcPr.append(tcBorders)
 
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
@@ -111,18 +152,19 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
         "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
-    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
+        doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
     # Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
     doc.add_paragraph("A continuación se detallan los errores más comunes encontrados durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Error'
-    table.cell(0, 1).text = 'Explicación'
-    for error, explicacion in errores:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for error, ocurrencias in resumen['Errores más comunes']:
         row = table.add_row().cells
         row[0].text = error
-        row[1].text = explicacion
+        row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
     
     # Análisis de Advertencias
@@ -130,11 +172,12 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción de la Advertencia'
-    table.cell(0, 1).text = 'Explicación'
-    for advertencia, explicacion in advertencias:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
         row = table.add_row().cells
         row[0].text = advertencia
-        row[1].text = explicacion
+        row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
     
     # Análisis de Eventos Críticos
@@ -142,12 +185,36 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados durante la auditoría:")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = 'Descripción del Evento Crítico'
-    table.cell(0, 1).text = 'Explicación'
-    for evento, explicacion in eventos_criticos:
+    table.cell(0, 1).text = 'Ocurrencias'
+    agregar_bordes_tabla(table)
+    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
         row = table.add_row().cells
         row[0].text = evento
-        row[1].text = explicacion
+        row[1].text = str(ocurrencias)
     doc.add_paragraph("\n")
+    
+    # Patrones Recurrentes y Observaciones
+    doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
+    doc.add_paragraph(
+        "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
+        "Específicamente, se observó que ciertos errores tienden a ocurrir en intervalos de tiempo similares, lo que podría indicar "
+        "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. "
+        "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
+    )
+    
+    # Recomendaciones y Mejores Prácticas
+    doc.add_heading('Recomendaciones y Mejores Prácticas', level=1)
+    doc.add_paragraph(
+        "En base a los resultados de la auditoría, se sugieren las siguientes recomendaciones para mejorar la estabilidad y seguridad del sistema:\n"
+        "1. **Revisión de la Infraestructura:** Evaluar la infraestructura del sistema para identificar posibles cuellos de botella, "
+        "especialmente aquellos que podrían estar causando sobrecargas o fallos de conexión a la base de datos.\n"
+        "2. **Monitoreo de Seguridad:** Implementar sistemas de monitoreo de seguridad más robustos para detectar intentos de acceso no autorizados "
+        "y brechas de seguridad antes de que puedan ser explotadas.\n"
+        "3. **Optimización de Recursos:** Revisar y optimizar el uso de los recursos del sistema, incluyendo memoria y espacio en disco, para evitar "
+        "futuros problemas relacionados con el rendimiento.\n"
+        "4. **Mantenimiento Preventivo:** Establecer un plan de mantenimiento preventivo que incluya revisiones periódicas de logs y auditorías "
+        "regulares para identificar y resolver problemas antes de que se conviertan en críticos."
+    )
     
     # Firma del Auditor
     doc.add_heading('Firmas', level=1)
@@ -165,43 +232,45 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
 # Función principal para la ejecución de la aplicación en Streamlit
 def main():
     st.title("Auditoría de Logs del Sistema")
-    
-    st.markdown("""
-    ### Descripción
-    Esta aplicación permite cargar archivos de logs en formato Excel y realizar una auditoría automática para identificar errores, advertencias, y eventos críticos.
-    Los resultados se pueden descargar en un informe detallado de Word.
-    
-    ### Instrucciones
-    1. Seleccione un archivo de logs en formato Excel.
-    2. El archivo debe contener una columna llamada 'Log Message' con los mensajes de los logs.
-    3. Haga clic en 'Generar Informe Word' para descargar un informe detallado de la auditoría.
-    """)
-    
-    archivo_subido = st.file_uploader("Seleccione un archivo de logs en Excel", type="xlsx")
-    
-    if archivo_subido:
-        logs = leer_logs_excel(archivo_subido)
+    st.write(
+        """
+        ### Descripción de la Auditoría de Logs
+        Los logs son registros que documentan eventos importantes que ocurren en un sistema de software. Estos registros pueden ayudar a los administradores a diagnosticar problemas, monitorear la seguridad, y asegurar que el sistema esté funcionando correctamente. 
         
-        if logs:
-            errores, advertencias, eventos_criticos, otros_eventos = analizar_logs(logs)
-            
-            resumen = generar_resumen(errores, advertencias, eventos_criticos, otros_eventos)
-            
-            st.subheader("Resumen de Resultados")
-            st.write(f"Total de Logs Analizados: {resumen['Total de logs']}")
-            st.write(f"Errores: {resumen['Errores']}")
-            st.write(f"Advertencias: {resumen['Advertencias']}")
-            st.write(f"Eventos
-            st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
-            
-            if st.button("Generar Informe Word"):
-                buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, resumen['Total de logs'])
-                st.download_button(
-                    label="Descargar Informe Word", 
-                    data=buffer, 
-                    file_name="informe_auditoria_logs.docx", 
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-                )
+        Esta herramienta permite cargar archivos de logs de un sistema, analizar los registros en busca de errores, advertencias, y eventos críticos, y generar un informe detallado en formato Word.
+        
+        ### Instrucciones para Usar la Herramienta
+        1. **Seleccione los archivos de logs:** Puede cargar múltiples archivos de logs en formato `.log` o archivos de Excel `.xlsx`.
+        2. **Analice los logs:** Los registros serán analizados y categorizados.
+        3. **Genere un informe:** Haga clic en el botón para generar un informe de auditoría en formato Word.
+        """
+    )
+    
+    archivos_subidos = st.file_uploader("Seleccione los archivos de logs", accept_multiple_files=True, type=["log", "xlsx"])
+    
+    if archivos_subidos:
+        resultados = []
+        total_logs = 0
+        
+        for archivo in archivos_subidos:
+            logs = leer_logs(archivo)
+            total_logs += len(logs)
+            if logs:
+                resultados.append(analizar_logs(logs))
+        
+        errores, advertencias, eventos_criticos, otros_eventos = combinar_resultados(resultados)
+        
+        resumen = generar_resumen(errores, advertencias, eventos_criticos, otros_eventos)
+        
+        st.subheader("Resumen de Resultados")
+        st.write(f"Total de Logs Analizados: {total_logs}")
+        st.write(f"Errores: {resumen['Errores']}")
+        st.write(f"Advertencias: {resumen['Advertencias']}")
+        st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
+        
+        if st.button("Generar Informe Word"):
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs)
+            st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
     main()
