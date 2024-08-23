@@ -56,6 +56,7 @@ def generar_explicacion(log):
         return "El servidor está sobrecargado. Es necesario distribuir la carga de trabajo o aumentar la capacidad del servidor."
     else:
         return "Este evento registrado requiere una revisión detallada."
+
 # Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
@@ -124,8 +125,9 @@ def agregar_bordes_tabla(tabla):
             border.set(qn('w:color'), '000000')
             tcBorders.append(border)
         tcPr.append(tcBorders)
+
 # Función para generar el informe de auditoría en formato Word
-def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs):
+def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs):
     doc = Document()
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
@@ -143,6 +145,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
+    
+    # Resumen Ejecutivo
     doc.add_heading('Resumen Ejecutivo', level=1)
     doc.add_paragraph(
         f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
@@ -151,44 +155,25 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
-    # Análisis de Errores
-    doc.add_heading('Análisis de Errores', level=1)
-    doc.add_paragraph("A continuación se detallan los errores más comunes encontrados durante la auditoría:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción del Error'
-    table.cell(0, 1).text = 'Ocurrencias'
+    # Análisis Detallado de Cada Log
+    doc.add_heading('Análisis Detallado de Logs', level=1)
+    
+    # Agregar una tabla con todos los logs analizados y sus explicaciones
+    table = doc.add_table(rows=1, cols=3)
+    table.cell(0, 0).text = 'Severidad'
+    table.cell(0, 1).text = 'Mensaje del Log'
+    table.cell(0, 2).text = 'Explicación'
     agregar_bordes_tabla(table)
-    for error, ocurrencias in resumen['Errores más comunes']:
+    
+    # Añadir filas para cada tipo de log con su respectiva explicación
+    for log, explicacion in errores + advertencias + eventos_criticos + otros_eventos:
         row = table.add_row().cells
-        row[0].text = error
-        row[1].text = str(ocurrencias)
+        row[0].text = 'ERROR' if log in [x[0] for x in errores] else 'WARNING' if log in [x[0] for x in advertencias] else 'CRITICAL' if log in [x[0] for x in eventos_criticos] else 'OTROS'
+        row[1].text = log
+        row[2].text = explicacion
+    
     doc.add_paragraph("\n")
     
-    # Análisis de Advertencias
-    doc.add_heading('Análisis de Advertencias', level=1)
-    doc.add_paragraph("A continuación se detallan las advertencias más comunes encontradas durante la auditoría:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción de la Advertencia'
-    table.cell(0, 1).text = 'Ocurrencias'
-    agregar_bordes_tabla(table)
-    for advertencia, ocurrencias in resumen['Advertencias más comunes']:
-        row = table.add_row().cells
-        row[0].text = advertencia
-        row[1].text = str(ocurrencias)
-    doc.add_paragraph("\n")
-    
-    # Análisis de Eventos Críticos
-    doc.add_heading('Análisis de Eventos Críticos', level=1)
-    doc.add_paragraph("A continuación se detallan los eventos críticos más comunes encontrados durante la auditoría:")
-    table = doc.add_table(rows=1, cols=2)
-    table.cell(0, 0).text = 'Descripción del Evento Crítico'
-    table.cell(0, 1).text = 'Ocurrencias'
-    agregar_bordes_tabla(table)
-    for evento, ocurrencias in resumen['Eventos críticos más comunes']:
-        row = table.add_row().cells
-        row[0].text = evento
-        row[1].text = str(ocurrencias)
-    doc.add_paragraph("\n")
     # Patrones Recurrentes y Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
     doc.add_paragraph(
@@ -265,7 +250,7 @@ def main():
         st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
         
         if st.button("Generar Informe Word"):
-            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, total_logs)
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
