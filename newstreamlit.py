@@ -160,8 +160,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_heading('Análisis de Errores', level=1)
     table = doc.add_table(rows=1, cols=3)
     table.style = 'Table Grid'
-    table.cell(
-    table.style = 'Table Grid'
     table.cell(0, 0).text = 'Mensaje del Error'
     table.cell(0, 1).text = 'Hora'
     table.cell(0, 2).text = 'Explicación'
