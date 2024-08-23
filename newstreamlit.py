@@ -283,8 +283,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     # Conclusión
     doc.add_heading('Conclusión', level=1)
     doc.add_paragraph(
-        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto
-        problemas críticos como áreas de mejora. "
+        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto problemas críticos como áreas de mejora. "
         "Es evidente que existen problemas de conectividad y sobrecarga de recursos que deben ser abordados para asegurar la estabilidad y disponibilidad del sistema. "
         "Asi mismo, los intentos de acceso no autorizado resaltan la necesidad de mejorar las medidas de seguridad. Implementar las recomendaciones propuestas ayudará a mitigar estos riesgos, mejorar la eficiencia y garantizar la integridad y seguridad del sistema a largo plazo."
     )
