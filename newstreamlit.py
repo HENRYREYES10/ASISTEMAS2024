@@ -16,7 +16,12 @@ def leer_logs(file):
             return file.read().decode('latin-1').splitlines()
         elif file.name.endswith('.xlsx'):
             df = pd.read_excel(file)
-            return df['Log Message'].tolist()  # Ajusta según la columna de tu Excel
+            # Cambiado para usar la columna "Message"
+            if 'Message' in df.columns:
+                return df['Message'].tolist()
+            else:
+                st.error("No se encontró la columna 'Message' en el archivo.")
+                return []
         else:
             st.error("Formato de archivo no soportado. Suba un archivo .log o .xlsx")
             return []
@@ -150,7 +155,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
     doc.add_paragraph(
         f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
-        "La auditoría identificó varios problemas críticos que requieren atención inmediata."
+        "La auditoría identificó varios problemas críticos que requierenatención inmediata."
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
