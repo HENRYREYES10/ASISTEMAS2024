@@ -27,6 +27,7 @@ def leer_logs(file):
     except Exception as e:
         st.error(f"Error al leer el archivo: {e}")
         return []
+
 # Función para generar explicaciones detalladas y personalizadas para cada log
 def generar_explicacion(log):
     message = log[1]
@@ -95,6 +96,7 @@ def analizar_logs(logs):
             otros_eventos.append((log, explicacion))
     
     return errores, advertencias, eventos_criticos, otros_eventos
+
 # Función para combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
@@ -117,6 +119,7 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Otros eventos': len(otros_eventos),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
+
 # Función para añadir bordes a una tabla en Word
 def agregar_bordes_tabla(tabla):
     tbl = tabla._tbl
@@ -175,6 +178,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
+
     # Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
     table = doc.add_table(rows=1, cols=3)
@@ -219,6 +223,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         row[0].text = log[1]
         row[1].text = log[2]
         row[2].text = explicacion
+
     # Patrones Recurrentes y Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
     doc.add_paragraph(
@@ -266,10 +271,37 @@ def main():
         
         Esta herramienta permite cargar archivos de logs de un sistema, analizar los registros en busca de errores, advertencias, y eventos críticos, y generar un informe detallado en formato Word.
         
+        ### Tipos de Logs Soportados
+        Esta herramienta puede analizar y categorizar los siguientes tipos de logs:
+        - Conexión fallida a la base de datos
+        - Incapacidad para alcanzar endpoints de API
+        - Errores de sincronización de datos
+        - Intentos de acceso no autorizados
+        - Sobrecargas del servidor
+        - Y muchos más...
+        
+        ### Beneficios de la Auditoría de Logs
+        Realizar una auditoría de logs proporciona una visión detallada de los eventos del sistema, permitiendo:
+        - Identificar y corregir problemas críticos rápidamente.
+        - Mejorar la seguridad al detectar intentos de acceso no autorizados.
+        - Optimizar el rendimiento del sistema mediante la identificación de cuellos de botella.
+        - Asegurar el cumplimiento normativo al mantener un registro detallado de todas las actividades.
+        
         ### Instrucciones para Usar la Herramienta
         1. **Seleccione los archivos de logs:** Puede cargar múltiples archivos de logs en formato `.log` o archivos de Excel `.xlsx`.
         2. **Analice los logs:** Los registros serán analizados y categorizados.
         3. **Genere un informe:** Haga clic en el botón para generar un informe de auditoría en formato Word.
+        
+        ### Descarga e Interpretación del Informe
+        Una vez completado el análisis de logs, puede descargar un informe detallado en formato Word. El informe incluye:
+        - Un resumen ejecutivo de los resultados.
+        - Análisis detallado de errores, advertencias y eventos críticos.
+        - Recomendaciones específicas para mejorar la estabilidad y seguridad del sistema.
+        
+        Para descargar el informe, haga clic en el botón "Generar Informe Word" y luego en "Descargar Informe Word".
+        
+        ### ¿Necesita Ayuda?
+        Si tiene alguna pregunta o necesita asistencia, por favor, [contáctenos](#).
         """
     )
     
