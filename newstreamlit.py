@@ -56,7 +56,7 @@ def generar_explicacion(log):
     elif "Server overload" in message:
         return "El servidor está sobrecargado. Considere optimizar las aplicaciones, balancear la carga o aumentar los recursos del servidor."
     else:
-        return "Este evento registrado requiere una revisión detallada para determinar su impacto y causas exactas."
+        return f"Evento no reconocido: {message}. Es necesario realizar un análisis detallado para identificar la causa y el impacto potencial."
 
 # Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
@@ -64,6 +64,7 @@ def analizar_logs(logs):
     
     for log in logs:
         severity = log[0]
+        message = log[1]
         explicacion = generar_explicacion(log)
         if severity == 'ERROR':
             errores.append((log, explicacion))
@@ -115,15 +116,13 @@ def agregar_bordes_tabla(tabla):
         tcPr.append(tcBorders)
 
 # Función para generar el informe de auditoría en formato Word
-def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos):
+def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs):
     doc = Document()
-    
-    # Carátula
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
-    doc.add_paragraph(f'Total de Logs Analizados: {resumen["Total de logs"]}', style='Heading 3')
+    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}', style='Heading 3')
     doc.add_paragraph("\n")
-    
+
     # Índice
     doc.add_heading('Índice', level=1)
     doc.add_paragraph('1. Introducción')
@@ -148,7 +147,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "diagnóstico y auditoría del sistema, proporcionando un rastro de actividades que permite a los administradores y desarrolladores "
         "identificar y resolver problemas, asegurar el cumplimiento normativo y mantener la seguridad del sistema."
     )
-    
     doc.add_heading('Objetivo de la Auditoría', level=1)
     doc.add_paragraph(
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
@@ -159,14 +157,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_heading('Metodología', level=1)
     doc.add_paragraph(
         "La auditoría fue realizada utilizando una herramienta automatizada que analiza los archivos de logs generados por el sistema. "
-        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones "
-        "predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
+        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
     )
 
     # Resumen Ejecutivo
     doc.add_heading('Resumen Ejecutivo', level=1)
     doc.add_paragraph(
-        f"Se analizaron un total de {resumen['Total de logs']} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
+        f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
         "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
@@ -187,9 +184,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in errores:
         row = table.add_row().cells
-        row[0].text = log[1]  # Mensaje del error
-        row[1].text = str(log[2])  # Hora
-        row[2].text = explicacion  # Explicación
+        row[0].text = log[1]
+        row[1].text = str(log[2])
+        row[2].text = explicacion
 
     # Análisis de Advertencias
     doc.add_heading('Análisis de Advertencias', level=1)
@@ -202,9 +199,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in advertencias:
         row = table.add_row().cells
-        row[0].text = log[1]  # Mensaje de la advertencia
-        row[1].text = str(log[2])  # Hora
-        row[2].text = explicacion  # Explicación
+        row[0].text = log[1]
+        row[1].text = str(log[2])
+        row[2].text = explicacion
 
     # Análisis de Eventos Críticos
     doc.add_heading('Análisis de Eventos Críticos', level=1)
@@ -217,9 +214,9 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
-        row[0].text = log[1]  # Mensaje del evento crítico
-        row[1].text = str(log[2])  # Hora
-        row[2].text = explicacion  # Explicación
+        row[0].text = log[1]
+        row[1].text = str(log[2])
+        row[2].text = explicacion
 
     # Patrones Recurrentes y Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
@@ -356,7 +353,7 @@ def main():
         st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
         
         if st.button("Generar Informe Word"):
-            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos)
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
