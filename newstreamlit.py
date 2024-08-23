@@ -144,9 +144,12 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     )
     doc.add_paragraph("\n")
     doc.add_heading('Resumen Ejecutivo', level=1)
-    doc.add_paragraph(
-        f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
-        f"{resumen['Advertencias']} como advertencias y
+   doc.add_paragraph(
+    f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
+    f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
+    "La auditoría identificó varios problemas críticos que requieren atención inmediata."
+   )
+
         f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
