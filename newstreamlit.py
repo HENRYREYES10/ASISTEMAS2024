@@ -147,13 +147,17 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_heading('Índice', level=1)
     doc.add_paragraph('1. Introducción')
     doc.add_paragraph('2. Objetivo de la Auditoría')
-    doc.add_paragraph('3. Resumen Ejecutivo')
-    doc.add_paragraph('4. Análisis de Errores')
-    doc.add_paragraph('5. Análisis de Advertencias')
-    doc.add_paragraph('6. Análisis de Eventos Críticos')
-    doc.add_paragraph('7. Patrones Recurrentes y Observaciones')
-    doc.add_paragraph('8. Recomendaciones y Mejores Prácticas')
-    doc.add_paragraph('9. Firmas')
+    doc.add_paragraph('3. Metodología')
+    doc.add_paragraph('4. Resumen Ejecutivo')
+    doc.add_paragraph('5. Análisis de Errores')
+    doc.add_paragraph('6. Análisis de Advertencias')
+    doc.add_paragraph('7. Análisis de Eventos Críticos')
+    doc.add_paragraph('8. Patrones Recurrentes y Observaciones')
+    doc.add_paragraph('9. Impacto Potencial de los Problemas Identificados')
+    doc.add_paragraph('10. Recomendaciones Detalladas')
+    doc.add_paragraph('11. Acciones Correctivas Inmediatas')
+    doc.add_paragraph('12. Conclusión')
+    doc.add_paragraph('13. Firmas')
     doc.add_paragraph("\n")
 
     # Introducción y Objetivo
@@ -168,7 +172,14 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
-    doc.add_paragraph("\n")
+
+    # Metodología
+    doc.add_heading('Metodología', level=1)
+    doc.add_paragraph(
+        "La auditoría fue realizada utilizando una herramienta automatizada que analiza los archivos de logs generados por el sistema. "
+        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones "
+        "predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
+    )
 
     # Resumen Ejecutivo
     doc.add_heading('Resumen Ejecutivo', level=1)
@@ -177,7 +188,11 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
         "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
-    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
+    doc.add_paragraph(
+        "El análisis mostró que los errores más comunes están relacionados con problemas de conectividad y sobrecarga de recursos. "
+        "Las advertencias se centraron en intentos de acceso no autorizado y problemas de seguridad menores. Los eventos críticos "
+        "indicaron interrupciones significativas del sistema que podrían afectar la disponibilidad del servicio."
+    )
 
     # Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
@@ -233,20 +248,50 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
     )
 
-    # Recomendaciones y Mejores Prácticas
-    doc.add_heading('Recomendaciones y Mejores Prácticas', level=1)
+    # Impacto Potencial de los Problemas Identificados
+    doc.add_heading('Impacto Potencial de los Problemas Identificados', level=1)
     doc.add_paragraph(
-        "En base a los resultados de la auditoría, se sugieren las siguientes recomendaciones para mejorar la estabilidad y seguridad del sistema:\n"
-        "1. **Revisión de la Infraestructura:** Evaluar la infraestructura del sistema para identificar posibles cuellos de botella, "
-        "especialmente aquellos que podrían estar causando sobrecargas o fallos de conexión a la base de datos.\n"
-        "2. **Monitoreo de Seguridad:** Implementar sistemas de monitoreo de seguridad más robustos para detectar intentos de acceso no autorizados "
-        "y brechas de seguridad antes de que puedan ser explotadas.\n"
-        "3. **Optimización de Recursos:** Revisar y optimizar el uso de los recursos del sistema, incluyendo memoria y espacio en disco, para evitar "
-        "futuros problemas relacionados con el rendimiento.\n"
-        "4. **Mantenimiento Preventivo:** Establecer un plan de mantenimiento preventivo que incluya revisiones periódicas de logs y auditorías "
-        "regulares para identificar y resolver problemas antes de que se conviertan en críticos.\n"
-        "5. **Capacitación de Personal:** Asegurar que el personal esté capacitado para responder de manera efectiva a los incidentes y para utilizar "
-        "herramientas de monitoreo y diagnóstico."
+        "Los problemas identificados en esta auditoría podrían tener un impacto significativo en la operación y seguridad del sistema. "
+        "Los errores de conectividad y las sobrecargas de recursos pueden llevar a tiempos de inactividad, afectando la disponibilidad del servicio. "
+        "Los intentos de acceso no autorizado y las brechas de seguridad podrían comprometer datos sensibles y la integridad del sistema."
+    )
+
+    # Recomendaciones Detalladas
+    doc.add_heading('Recomendaciones Detalladas', level=1)
+    doc.add_paragraph(
+        "Para abordar los problemas identificados, se recomiendan las siguientes acciones específicas:\n"
+        "1. **Monitoreo Continuo:** Implementar herramientas de monitoreo para detectar y alertar sobre problemas de conectividad y sobrecarga en tiempo real.\n"
+        "2. **Fortalecimiento de la Seguridad:** Revisar y actualizar las políticas de seguridad para prevenir accesos no autorizados, incluyendo autenticación de múltiples factores.\n"
+        "3. **Optimización de Recursos:** Realizar un análisis de rendimiento para identificar y eliminar cuellos de botella, mejorando así la eficiencia del sistema.\n"
+        "4. **Actualización de la Infraestructura:** Considerar la actualización del hardware o la ampliación de la capacidad del servidor para manejar mejor la carga y los picos de tráfico.\n"
+        "5. **Capacitación del Personal:** Asegurar que el personal esté capacitado para responder a incidentes de seguridad y para utilizar herramientas de monitoreo y diagnóstico de manera efectiva.\n"
+        "6. **Revisión Periódica de Logs:** Establecer un calendario de revisión de logs para identificar problemas emergentes antes de que se conviertan en críticos.\n"
+        "7. **Auditorías de Seguridad:** Realizar auditorías de seguridad regulares para identificar vulnerabilidades y asegurar que las políticas de seguridad se estén aplicando correctamente."
+    )
+
+    # Acciones Correctivas Inmediatas
+    doc.add_heading('Acciones Correctivas Inmediatas', level=1)
+    doc.add_paragraph(
+        "Basado en los hallazgos de esta auditoría, se recomiendan las siguientes acciones correctivas inmediatas para mitigar los riesgos identificados:\n"
+        "1. **Resolver Problemas de Conectividad:** Identificar y solucionar los problemas de conexión a la base de datos para asegurar la disponibilidad continua del servicio.\n"
+        "2. **Aumentar la Capacidad de Almacenamiento:** Revisar y expandir la capacidad de almacenamiento para evitar problemas relacionados con el espacio en disco insuficiente.\n"
+        "3. **Implementar Monitoreo de Seguridad:** Instalar herramientas de monitoreo que alerten automáticamente sobre intentos de acceso no autorizado y brechas de seguridad.\n"
+        "4. **Optimización de Procesos de Backup:** Asegurarse de que los procesos de respaldo de datos estén configurados correctamente y que se realicen regularmente sin fallos.\n"
+        "5. **Actualizar Configuraciones de Tiempo de Sesión:** Revisar y ajustar las configuraciones de tiempo de sesión para evitar cierres inesperados de sesión de usuario debido a configuraciones demasiado estrictas."
+    )
+
+    # Conclusión
+    doc.add_heading('Conclusión', level=1)
+    doc.add_paragraph(
+        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto problemas críticos como áreas de mejora. "
+        "Es evidente que existen problemas de conectividad y sobrecarga de recursos que deben ser abordados para asegurar la estabilidad y disponibilidad del sistema. "
+        "Asimismo, los intentos de acceso no autorizado resaltan la necesidad de mejorar las medidas de seguridad. Implementar las recomendaciones propuestas ayudará "
+        "a mitigar estos riesgos, mejorar la eficiencia y garantizar la integridad y seguridad del sistema a largo plazo."
+    )
+    doc.add_paragraph(
+        "Se recomienda realizar auditorías de logs periódicamente para mantener un control continuo sobre el estado del sistema y responder proactivamente a cualquier "
+        "incidencia que pudiera surgir. La adopción de una estrategia de monitoreo continuo y la actualización regular de políticas y procedimientos de seguridad serán clave "
+        "para mantener la resiliencia del sistema ante futuros desafíos."
     )
 
     # Firma del Auditor
