@@ -55,6 +55,26 @@ def generar_explicacion(log):
         return "Intento de acceso no autorizado detectado. Revise los registros de seguridad para identificar al actor y considere aumentar las medidas de protección."
     elif "Server overload" in message:
         return "El servidor está sobrecargado. Considere optimizar las aplicaciones, balancear la carga o aumentar los recursos del servidor."
+    elif "Data synchronization error" in message:
+        return "Error en la sincronización de datos. Verifique las conexiones de red, la consistencia de datos y los procesos de sincronización."
+    elif "API rate limit exceeded" in message:
+        return "Límite de tasa de API excedido. Optimice las llamadas a la API para evitar exceder los límites y considere implementar un manejo de tasas."
+    elif "Invalid input detected" in message:
+        return "Se ha detectado una entrada inválida. Asegúrese de que los datos introducidos cumplen con los formatos y requisitos esperados."
+    elif "Password reset requested" in message:
+        return "Solicitud de restablecimiento de contraseña detectada. Verifique si se trata de una solicitud legítima y si es necesario tomar medidas adicionales."
+    elif "Failed login attempt detected" in message:
+        return "Intento de inicio de sesión fallido detectado. Puede ser indicativo de intentos de acceso no autorizados o errores en la autenticación del usuario."
+    elif "Session timeout" in message:
+        return "Tiempo de sesión agotado. Los usuarios han sido desconectados por inactividad prolongada o debido a políticas de seguridad."
+    elif "Scheduled report generated" in message:
+        return "Un informe programado se ha generado correctamente. Revise el contenido para asegurar que los datos presentados son precisos y relevantes."
+    elif "Customer record updated" in message:
+        return "El registro de un cliente ha sido actualizado. Verifique los cambios para asegurar que se reflejan correctamente en el sistema."
+    elif "Data export completed" in message:
+        return "Exportación de datos completada. Revise el archivo exportado para confirmar que todos los datos necesarios están presentes y son correctos."
+    elif "User logged in successfully" in message:
+        return "Inicio de sesión exitoso. El usuario ha accedido al sistema correctamente."
     else:
         return f"Evento no reconocido: {message}. Es necesario realizar un análisis detallado para identificar la causa y el impacto potencial."
 
@@ -120,7 +140,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc = Document()
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
-    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}', style='Heading 3')
+    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}',
     doc.add_paragraph("\n")
 
     # Índice
@@ -157,7 +177,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_heading('Metodología', level=1)
     doc.add_paragraph(
         "La auditoría fue realizada utilizando una herramienta automatizada que analiza los archivos de logs generados por el sistema. "
-        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
+        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones "
+        "predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
     )
 
     # Resumen Ejecutivo
@@ -185,7 +206,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in errores:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Análisis de Advertencias
@@ -200,7 +221,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in advertencias:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Análisis de Eventos Críticos
@@ -215,7 +236,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for log, explicacion in eventos_criticos:
         row = table.add_row().cells
         row[0].text = log[1]
-        row[1].text = str(log[2])
+        row[1].text = log[2]
         row[2].text = explicacion
 
     # Patrones Recurrentes y Observaciones
@@ -262,15 +283,14 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     # Conclusión
     doc.add_heading('Conclusión', level=1)
     doc.add_paragraph(
-        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto problemas críticos como áreas de mejora. "
+        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto
+        problemas críticos como áreas de mejora. "
         "Es evidente que existen problemas de conectividad y sobrecarga de recursos que deben ser abordados para asegurar la estabilidad y disponibilidad del sistema. "
-        "Asimismo, los intentos de acceso no autorizado resaltan la necesidad de mejorar las medidas de seguridad. Implementar las recomendaciones propuestas ayudará "
-        "a mitigar estos riesgos, mejorar la eficiencia y garantizar la integridad y seguridad del sistema a largo plazo."
+        "Asi mismo, los intentos de acceso no autorizado resaltan la necesidad de mejorar las medidas de seguridad. Implementar las recomendaciones propuestas ayudará a mitigar estos riesgos, mejorar la eficiencia y garantizar la integridad y seguridad del sistema a largo plazo."
     )
     doc.add_paragraph(
         "Se recomienda realizar auditorías de logs periódicamente para mantener un control continuo sobre el estado del sistema y responder proactivamente a cualquier "
-        "incidencia que pudiera surgir. La adopción de una estrategia de monitoreo continuo y la actualización regular de políticas y procedimientos de seguridad serán clave "
-        "para mantener la resiliencia del sistema ante futuros desafíos."
+        "incidencia que pudiera surgir. La adopción de una estrategia de monitoreo continuo y la actualización regular de políticas y procedimientos de seguridad serán clave para mantener la resiliencia del sistema ante futuros desafíos."
     )
 
     # Firma del Auditor
@@ -308,7 +328,7 @@ def main():
         ### Beneficios de la Auditoría de Logs
         Realizar una auditoría de logs proporciona una visión detallada de los eventos del sistema, permitiendo:
         - Identificar y corregir problemas críticos rápidamente.
-        - Mejorar la seguridad al detectar intentos de acceso no autorizado.
+        - Mejorar la seguridad al detectar intentos de acceso no autorizados.
         - Optimizar el rendimiento del sistema mediante la identificación de cuellos de botella.
         - Asegurar el cumplimiento normativo al mantener un registro detallado de todas las actividades.
         
