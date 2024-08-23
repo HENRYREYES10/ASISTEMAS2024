@@ -60,6 +60,7 @@ def generar_explicacion(log):
         return "Límite de tasa de API excedido. Revise las políticas de uso y optimice las llamadas a la API."
     else:
         return "Este evento registrado requiere una revisión detallada."
+
 # Función para analizar los logs y categorizar los eventos
 def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
@@ -78,7 +79,6 @@ def analizar_logs(logs):
             otros_eventos.append((log, explicacion))
     
     return errores, advertencias, eventos_criticos, otros_eventos
-
 # Función para combinar resultados de múltiples archivos de logs
 def combinar_resultados(resultados):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
@@ -101,6 +101,21 @@ def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
         'Otros eventos': len(otros_eventos),
         'Fecha del resumen': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
+# Función para añadir bordes a una tabla en Word
+def agregar_bordes_tabla(tabla):
+    tbl = tabla._tbl
+    for cell in tbl.iter_tcs():
+        tcPr = cell.get_or_add_tcPr()
+        tcBorders = OxmlElement('w:tcBorders')
+        for border_name in ['top', 'left', 'bottom', 'right']:
+            border = OxmlElement(f'w:{border_name}')
+            border.set(qn('w:val'), 'single')
+            border.set(qn('w:sz'), '4')
+            border.set(qn('w:space'), '0')
+            border.set(qn('w:color'), '000000')
+            tcBorders.append(border)
+        tcPr.append(tcBorders)
+
 # Función para generar el informe de auditoría en formato Word
 def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs):
     doc = Document()
@@ -108,7 +123,20 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
     doc.add_paragraph(f'Total de Logs Analizados: {total_logs}', style='Heading 3')
     doc.add_paragraph("\n")
-    
+
+    # Índice
+    doc.add_heading('Índice', level=1)
+    doc.add_paragraph('1. Introducción')
+    doc.add_paragraph('2. Objetivo de la Auditoría')
+    doc.add_paragraph('3. Resumen Ejecutivo')
+    doc.add_paragraph('4. Análisis de Errores')
+    doc.add_paragraph('5. Análisis de Advertencias')
+    doc.add_paragraph('6. Análisis de Eventos Críticos')
+    doc.add_paragraph('7. Patrones Recurrentes y Observaciones')
+    doc.add_paragraph('8. Recomendaciones y Mejores Prácticas')
+    doc.add_paragraph('9. Firmas')
+    doc.add_paragraph("\n")
+
     # Introducción y Objetivo
     doc.add_heading('Introducción', level=1)
     doc.add_paragraph(
@@ -122,26 +150,68 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
-    # Sección de Análisis de Errores
+
+    # Resumen Ejecutivo
+    doc.add_heading('Resumen Ejecutivo', level=1)
+    doc.add_paragraph(
+        f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
+        f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
+        "La auditoría identificó varios problemas críticos que requieren atención inmediata."
+    )
+    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
+    # Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje del Error'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
     for log, explicacion in errores:
-        doc.add_paragraph(f"Mensaje: {log[1]}", style='List Bullet')
-        doc.add_paragraph(f"Hora: {log[2]}", style='List Bullet')
-        doc.add_paragraph(f"Explicación: {explicacion}\n", style='List Bullet')
+        row = table.add_row().cells
+        row[0].text = log[1]
+        row[1].text = log[2]
+        row[2].text = explicacion
 
-    # Sección de Análisis de Advertencias
+    # Análisis de Advertencias
     doc.add_heading('Análisis de Advertencias', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje de la Advertencia'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
     for log, explicacion in advertencias:
-        doc.add_paragraph(f"Mensaje: {log[1]}", style='List Bullet')
-        doc.add_paragraph(f"Hora: {log[2]}", style='List Bullet')
-        doc.add_paragraph(f"Explicación: {explicacion}\n", style='List Bullet')
+        row = table.add_row().cells
+        row[0].text = log[1]
+        row[1].text = log[2]
+        row[2].text = explicacion
 
-    # Sección de Análisis de Eventos Críticos
+    # Análisis de Eventos Críticos
     doc.add_heading('Análisis de Eventos Críticos', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje del Evento Crítico'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
     for log, explicacion in eventos_criticos:
-        doc.add_paragraph(f"Mensaje: {log[1]}", style='List Bullet')
-        doc.add_paragraph(f"Hora: {log[2]}", style='List Bullet')
-        doc.add_paragraph(f"Explicación: {explicacion}\n", style='List Bullet')
+        row = table.add_row().cells
+        row[0].text = log[1]
+        row[1].text = log[2]
+        row[2].text = explicacion
+    # Patrones Recurrentes y Observaciones
+    doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
+    doc.add_paragraph(
+        "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
+        "Específicamente, se observó que ciertos errores tienden a ocurrir en intervalos de tiempo similares, lo que podría indicar "
+        "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. "
+        "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
+    )
+
     # Recomendaciones y Mejores Prácticas
     doc.add_heading('Recomendaciones y Mejores Prácticas', level=1)
     doc.add_paragraph(
@@ -163,7 +233,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     doc.add_paragraph("Firma del Auditor: __________________________")
     doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
     doc.add_paragraph("\n")
-    
+
     # Guardar el documento en un buffer en memoria
     buffer = BytesIO()
     doc.save(buffer)
@@ -199,7 +269,6 @@ def main():
             if logs:
                 resultados.append(analizar_logs(logs))
         
-        # Aquí se llama a la función combinar_resultados
         errores, advertencias, eventos_criticos, otros_eventos = combinar_resultados(resultados)
         
         resumen = generar_resumen(errores, advertencias, eventos_criticos, otros_eventos)
