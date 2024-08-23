@@ -152,7 +152,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
         "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
-        doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
+    doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
     # Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
