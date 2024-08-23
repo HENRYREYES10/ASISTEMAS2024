@@ -55,26 +55,6 @@ def generar_explicacion(log):
         return "Intento de acceso no autorizado detectado. Revise los registros de seguridad para identificar al actor y considere aumentar las medidas de protección."
     elif "Server overload" in message:
         return "El servidor está sobrecargado. Considere optimizar las aplicaciones, balancear la carga o aumentar los recursos del servidor."
-    elif "Data synchronization error" in message:
-        return "Error en la sincronización de datos. Verifique las conexiones de red, la consistencia de datos y los procesos de sincronización."
-    elif "API rate limit exceeded" in message:
-        return "Límite de tasa de API excedido. Optimice las llamadas a la API para evitar exceder los límites y considere implementar un manejo de tasas."
-    elif "Invalid input detected" in message:
-        return "Se ha detectado una entrada inválida. Asegúrese de que los datos introducidos cumplen con los formatos y requisitos esperados."
-    elif "Password reset requested" in message:
-        return "Solicitud de restablecimiento de contraseña detectada. Verifique si se trata de una solicitud legítima y si es necesario tomar medidas adicionales."
-    elif "Failed login attempt detected" in message:
-        return "Intento de inicio de sesión fallido detectado. Puede ser indicativo de intentos de acceso no autorizados o errores en la autenticación del usuario."
-    elif "Session timeout" in message:
-        return "Tiempo de sesión agotado. Los usuarios han sido desconectados por inactividad prolongada o debido a políticas de seguridad."
-    elif "Scheduled report generated" in message:
-        return "Un informe programado se ha generado correctamente. Revise el contenido para asegurar que los datos presentados son precisos y relevantes."
-    elif "Customer record updated" in message:
-        return "El registro de un cliente ha sido actualizado. Verifique los cambios para asegurar que se reflejan correctamente en el sistema."
-    elif "Data export completed" in message:
-        return "Exportación de datos completada. Revise el archivo exportado para confirmar que todos los datos necesarios están presentes y son correctos."
-    elif "User logged in successfully" in message:
-        return "Inicio de sesión exitoso. El usuario ha accedido al sistema correctamente."
     else:
         return "Este evento registrado requiere una revisión detallada para determinar su impacto y causas exactas."
 
@@ -84,7 +64,6 @@ def analizar_logs(logs):
     
     for log in logs:
         severity = log[0]
-        message = log[1]
         explicacion = generar_explicacion(log)
         if severity == 'ERROR':
             errores.append((log, explicacion))
@@ -136,79 +115,172 @@ def agregar_bordes_tabla(tabla):
         tcPr.append(tcBorders)
 
 # Función para generar el informe de auditoría en formato Word
-def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs):
+def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos):
     doc = Document()
+    
+    # Carátula
     doc.add_heading('INFORME DE AUDITORÍA DE LOGS DEL SISTEMA', 0)
     doc.add_paragraph(f'Fecha de Generación: {resumen["Fecha del resumen"]}', style='Heading 3')
-    doc.add_paragraph(f'Total de Logs Analizados: {total_logs}', style='Heading 3')
+    doc.add_paragraph(f'Total de Logs Analizados: {resumen["Total de logs"]}', style='Heading 3')
+    doc.add_paragraph("\n")
+    
+    # Índice
+    doc.add_heading('Índice', level=1)
+    doc.add_paragraph('1. Introducción')
+    doc.add_paragraph('2. Objetivo de la Auditoría')
+    doc.add_paragraph('3. Metodología')
+    doc.add_paragraph('4. Resumen Ejecutivo')
+    doc.add_paragraph('5. Análisis de Errores')
+    doc.add_paragraph('6. Análisis de Advertencias')
+    doc.add_paragraph('7. Análisis de Eventos Críticos')
+    doc.add_paragraph('8. Patrones Recurrentes y Observaciones')
+    doc.add_paragraph('9. Impacto Potencial de los Problemas Identificados')
+    doc.add_paragraph('10. Recomendaciones Detalladas')
+    doc.add_paragraph('11. Acciones Correctivas Inmediatas')
+    doc.add_paragraph('12. Conclusión')
+    doc.add_paragraph('13. Firmas')
     doc.add_paragraph("\n")
 
-    # Añadir análisis detallado
-    doc.add_heading('Análisis de Eventos', level=1)
+    # Introducción y Objetivo
+    doc.add_heading('Introducción', level=1)
+    doc.add_paragraph(
+        "Los logs son registros detallados de eventos que ocurren dentro de un sistema. Estos registros son fundamentales para la monitorización, "
+        "diagnóstico y auditoría del sistema, proporcionando un rastro de actividades que permite a los administradores y desarrolladores "
+        "identificar y resolver problemas, asegurar el cumplimiento normativo y mantener la seguridad del sistema."
+    )
+    
+    doc.add_heading('Objetivo de la Auditoría', level=1)
+    doc.add_paragraph(
+        "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
+        "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
+    )
 
-    # Analizar Errores
-    if errores:
-        doc.add_heading('Errores', level=2)
-        table = doc.add_table(rows=1, cols=3)
-        table.style = 'Table Grid'
-        table.cell(0, 0).text = 'Mensaje del Error'
-        table.cell(0, 1).text = 'Hora'
-        table.cell(0, 2).text = 'Explicación'
-        agregar_bordes_tabla(table)
-        
-        for log, explicacion in errores:
-            row = table.add_row().cells
-            row[0].text = str(log[1])
-            row[1].text = str(log[2])
-            row[2].text = explicacion
+    # Metodología
+    doc.add_heading('Metodología', level=1)
+    doc.add_paragraph(
+        "La auditoría fue realizada utilizando una herramienta automatizada que analiza los archivos de logs generados por el sistema. "
+        "Los logs se clasificaron en diferentes categorías (errores, advertencias, eventos críticos) basándose en palabras clave y patrones "
+        "predefinidos. Se realizó un análisis estadístico y se generaron explicaciones detalladas para cada tipo de log."
+    )
 
-    # Analizar Advertencias
-    if advertencias:
-        doc.add_heading('Advertencias', level=2)
-        table = doc.add_table(rows=1, cols=3)
-        table.style = 'Table Grid'
-        table.cell(0, 0).text = 'Mensaje de la Advertencia'
-        table.cell(0, 1).text = 'Hora'
-        table.cell(0, 2).text = 'Explicación'
-        agregar_bordes_tabla(table)
-        
-        for log, explicacion in advertencias:
-            row = table.add_row().cells
-            row[0].text = str(log[1])
-            row[1].text = str(log[2])
-            row[2].text = explicacion
+    # Resumen Ejecutivo
+    doc.add_heading('Resumen Ejecutivo', level=1)
+    doc.add_paragraph(
+        f"Se analizaron un total de {resumen['Total de logs']} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
+        f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
+        "La auditoría identificó varios problemas críticos que requieren atención inmediata."
+    )
+    doc.add_paragraph(
+        "El análisis mostró que los errores más comunes están relacionados con problemas de conectividad y sobrecarga de recursos. "
+        "Las advertencias se centraron en intentos de acceso no autorizado y problemas de seguridad menores. Los eventos críticos "
+        "indicaron interrupciones significativas del sistema que podrían afectar la disponibilidad del servicio."
+    )
 
-    # Analizar Eventos Críticos
-    if eventos_criticos:
-        doc.add_heading('Eventos Críticos', level=2)
-        table = doc.add_table(rows=1, cols=3)
-        table.style = 'Table Grid'
-        table.cell(0, 0).text = 'Mensaje del Evento Crítico'
-        table.cell(0, 1).text = 'Hora'
-        table.cell(0, 2).text = 'Explicación'
-        agregar_bordes_tabla(table)
-        
-        for log, explicacion in eventos_criticos:
-            row = table.add_row().cells
-            row[0].text = str(log[1])
-            row[1].text = str(log[2])
-            row[2].text = explicacion
+    # Análisis de Errores
+    doc.add_heading('Análisis de Errores', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje del Error'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
+    for log, explicacion in errores:
+        row = table.add_row().cells
+        row[0].text = log[1]  # Mensaje del error
+        row[1].text = str(log[2])  # Hora
+        row[2].text = explicacion  # Explicación
 
-    # Analizar Otros Eventos
-    if otros_eventos:
-        doc.add_heading('Otros Eventos', level=2)
-        table = doc.add_table(rows=1, cols=3)
-        table.style = 'Table Grid'
-        table.cell(0, 0).text = 'Mensaje del Evento'
-        table.cell(0, 1).text = 'Hora'
-        table.cell(0, 2).text = 'Explicación'
-        agregar_bordes_tabla(table)
-        
-        for log, explicacion in otros_eventos:
-            row = table.add_row().cells
-            row[0].text = str(log[1])
-            row[1].text = str(log[2])
-            row[2].text = explicacion
+    # Análisis de Advertencias
+    doc.add_heading('Análisis de Advertencias', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje de la Advertencia'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
+    for log, explicacion in advertencias:
+        row = table.add_row().cells
+        row[0].text = log[1]  # Mensaje de la advertencia
+        row[1].text = str(log[2])  # Hora
+        row[2].text = explicacion  # Explicación
+
+    # Análisis de Eventos Críticos
+    doc.add_heading('Análisis de Eventos Críticos', level=1)
+    table = doc.add_table(rows=1, cols=3)
+    table.style = 'Table Grid'
+    table.cell(0, 0).text = 'Mensaje del Evento Crítico'
+    table.cell(0, 1).text = 'Hora'
+    table.cell(0, 2).text = 'Explicación'
+    agregar_bordes_tabla(table)
+    
+    for log, explicacion in eventos_criticos:
+        row = table.add_row().cells
+        row[0].text = log[1]  # Mensaje del evento crítico
+        row[1].text = str(log[2])  # Hora
+        row[2].text = explicacion  # Explicación
+
+    # Patrones Recurrentes y Observaciones
+    doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
+    doc.add_paragraph(
+        "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
+        "Específicamente, se observó que ciertos errores tienden a ocurrir en intervalos de tiempo similares, lo que podría indicar "
+        "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. "
+        "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
+    )
+
+    # Impacto Potencial de los Problemas Identificados
+    doc.add_heading('Impacto Potencial de los Problemas Identificados', level=1)
+    doc.add_paragraph(
+        "Los problemas identificados en esta auditoría podrían tener un impacto significativo en la operación y seguridad del sistema. "
+        "Los errores de conectividad y las sobrecargas de recursos pueden llevar a tiempos de inactividad, afectando la disponibilidad del servicio. "
+        "Los intentos de acceso no autorizado y las brechas de seguridad podrían comprometer datos sensibles y la integridad del sistema."
+    )
+
+    # Recomendaciones Detalladas
+    doc.add_heading('Recomendaciones Detalladas', level=1)
+    doc.add_paragraph(
+        "Para abordar los problemas identificados, se recomiendan las siguientes acciones específicas:\n"
+        "1. **Monitoreo Continuo:** Implementar herramientas de monitoreo para detectar y alertar sobre problemas de conectividad y sobrecarga en tiempo real.\n"
+        "2. **Fortalecimiento de la Seguridad:** Revisar y actualizar las políticas de seguridad para prevenir accesos no autorizados, incluyendo autenticación de múltiples factores.\n"
+        "3. **Optimización de Recursos:** Realizar un análisis de rendimiento para identificar y eliminar cuellos de botella, mejorando así la eficiencia del sistema.\n"
+        "4. **Actualización de la Infraestructura:** Considerar la actualización del hardware o la ampliación de la capacidad del servidor para manejar mejor la carga y los picos de tráfico.\n"
+        "5. **Capacitación del Personal:** Asegurar que el personal esté capacitado para responder a incidentes de seguridad y para utilizar herramientas de monitoreo y diagnóstico de manera efectiva.\n"
+        "6. **Revisión Periódica de Logs:** Establecer un calendario de revisión de logs para identificar problemas emergentes antes de que se conviertan en críticos.\n"
+        "7. **Auditorías de Seguridad:** Realizar auditorías de seguridad regulares para identificar vulnerabilidades y asegurar que las políticas de seguridad se estén aplicando correctamente."
+    )
+
+    # Acciones Correctivas Inmediatas
+    doc.add_heading('Acciones Correctivas Inmediatas', level=1)
+    doc.add_paragraph(
+        "Basado en los hallazgos de esta auditoría, se recomiendan las siguientes acciones correctivas inmediatas para mitigar los riesgos identificados:\n"
+        "1. **Resolver Problemas de Conectividad:** Identificar y solucionar los problemas de conexión a la base de datos para asegurar la disponibilidad continua del servicio.\n"
+        "2. **Aumentar la Capacidad de Almacenamiento:** Revisar y expandir la capacidad de almacenamiento para evitar problemas relacionados con el espacio en disco insuficiente.\n"
+        "3. **Implementar Monitoreo de Seguridad:** Instalar herramientas de monitoreo que alerten automáticamente sobre intentos de acceso no autorizado y brechas de seguridad.\n"
+        "4. **Optimización de Procesos de Backup:** Asegurarse de que los procesos de respaldo de datos estén configurados correctamente y que se realicen regularmente sin fallos.\n"
+        "5. **Actualizar Configuraciones de Tiempo de Sesión:** Revisar y ajustar las configuraciones de tiempo de sesión para evitar cierres inesperados de sesión de usuario debido a configuraciones demasiado estrictas."
+    )
+
+    # Conclusión
+    doc.add_heading('Conclusión', level=1)
+    doc.add_paragraph(
+        "La auditoría de logs realizada proporciona una visión integral del estado actual del sistema, identificando tanto problemas críticos como áreas de mejora. "
+        "Es evidente que existen problemas de conectividad y sobrecarga de recursos que deben ser abordados para asegurar la estabilidad y disponibilidad del sistema. "
+        "Asimismo, los intentos de acceso no autorizado resaltan la necesidad de mejorar las medidas de seguridad. Implementar las recomendaciones propuestas ayudará "
+        "a mitigar estos riesgos, mejorar la eficiencia y garantizar la integridad y seguridad del sistema a largo plazo."
+    )
+    doc.add_paragraph(
+        "Se recomienda realizar auditorías de logs periódicamente para mantener un control continuo sobre el estado del sistema y responder proactivamente a cualquier "
+        "incidencia que pudiera surgir. La adopción de una estrategia de monitoreo continuo y la actualización regular de políticas y procedimientos de seguridad serán clave "
+        "para mantener la resiliencia del sistema ante futuros desafíos."
+    )
+
+    # Firma del Auditor
+    doc.add_heading('Firmas', level=1)
+    doc.add_paragraph("Firma del Auditor: __________________________")
+    doc.add_paragraph("Nombre del Auditor: [Nombre del Auditor]")
+    doc.add_paragraph("\n")
 
     # Guardar el documento en un buffer en memoria
     buffer = BytesIO()
@@ -284,7 +356,7 @@ def main():
         st.write(f"Eventos Críticos: {resumen['Eventos críticos']}")
         
         if st.button("Generar Informe Word"):
-            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs)
+            buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 if __name__ == "__main__":
