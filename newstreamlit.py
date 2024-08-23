@@ -143,14 +143,13 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
-    doc.add_heading('Resumen Ejecutivo', level=1)
-   doc.add_paragraph(
-    f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
-    f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
-    "La auditoría identificó varios problemas críticos que requieren atención inmediata."
-   )
 
-        f"{resumen['Eventos críticos']} como eventos críticos. La auditoría identificó varios problemas críticos que requieren atención inmediata."
+    # Aquí comienzan los análisis específicos
+    doc.add_heading('Resumen Ejecutivo', level=1)
+    doc.add_paragraph(
+        f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
+        f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
+        "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
@@ -172,7 +171,7 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     for evento_critico in eventos_criticos:
         doc.add_paragraph(f"{evento_critico[0]}: {evento_critico[1]}", style='List Bullet')
 
-    # Sección de Observaciones y Patrones Recurrentes
+    # Observaciones
     doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
     doc.add_paragraph(
         "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
@@ -180,7 +179,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. "
         "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
     )
-    # Recomendaciones y Mejores Prácticas
+
+    # Recomendaciones
     doc.add_heading('Recomendaciones y Mejores Prácticas', level=1)
     doc.add_paragraph(
         "En base a los resultados de la auditoría, se sugieren las siguientes recomendaciones para mejorar la estabilidad y seguridad del sistema:\n"
