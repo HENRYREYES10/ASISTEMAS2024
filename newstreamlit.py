@@ -16,11 +16,11 @@ def leer_logs(file):
             return file.read().decode('latin-1').splitlines()
         elif file.name.endswith('.xlsx'):
             df = pd.read_excel(file)
-            # Cambiado para usar la columna "Message"
-            if 'Message' in df.columns:
-                return df['Message'].tolist()
+            # Usar tanto 'Severity' como 'Message' para análisis
+            if 'Severity' in df.columns and 'Message' in df.columns:
+                return df[['Severity', 'Message']].values.tolist()
             else:
-                st.error("No se encontró la columna 'Message' en el archivo.")
+                st.error("No se encontraron las columnas 'Severity' o 'Message' en el archivo.")
                 return []
         else:
             st.error("Formato de archivo no soportado. Suba un archivo .log o .xlsx")
@@ -63,15 +63,17 @@ def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for log in logs:
-        explicacion = generar_explicacion(log)
-        if 'ERROR' in log:
-            errores.append((log, explicacion))
-        elif 'WARNING' in log:
-            advertencias.append((log, explicacion))
-        elif 'CRITICAL' in log:
-            eventos_criticos.append((log, explicacion))
+        severity = log[0]
+        message = log[1]
+        explicacion = generar_explicacion(message)
+        if severity == 'ERROR':
+            errores.append((message, explicacion))
+        elif severity == 'WARNING':
+            advertencias.append((message, explicacion))
+        elif severity == 'CRITICAL':
+            eventos_criticos.append((message, explicacion))
         else:
-            otros_eventos.append((log, explicacion))
+            otros_eventos.append((message, explicacion))
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
@@ -148,14 +150,15 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, total
         "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
-    doc.add_paragraph("\n")
+    doc.add_paragraph("\n &#8203;:contentReference[oaicite:0]{index=0}&#8203;
+    )
     
     # Resumen Ejecutivo
     doc.add_heading('Resumen Ejecutivo', level=1)
     doc.add_paragraph(
         f"Se analizaron un total de {total_logs} logs, de los cuales {resumen['Errores']} fueron clasificados como errores, "
         f"{resumen['Advertencias']} como advertencias y {resumen['Eventos críticos']} como eventos críticos. "
-        "La auditoría identificó varios problemas críticos que requierenatención inmediata."
+        "La auditoría identificó varios problemas críticos que requieren atención inmediata."
     )
     doc.add_paragraph("Metodología: Los logs fueron categorizados en errores, advertencias, y eventos críticos mediante la identificación de palabras clave en los registros.")
     
