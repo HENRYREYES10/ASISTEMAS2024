@@ -30,6 +30,9 @@ def leer_logs(file):
 
 # Función para generar explicaciones detalladas y personalizadas para cada log
 def generar_explicacion(log):
+    if not log or len(log) < 2:
+        return "Log incompleto o no válido."
+
     message = log[1].lower()
     if "database connection failed" in message:
         return "Fallo en la conexión con la base de datos. Esto podría deberse a credenciales incorrectas, un problema con la red, o el servicio de base de datos no está disponible."
@@ -83,7 +86,9 @@ def analizar_logs(logs):
     errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
     
     for log in logs:
-        severity = log[0].upper()
+        if len(log) < 3:
+            continue  # Saltar logs incompletos
+        severity = str(log[0]).upper()
         explicacion = generar_explicacion(log)
         if severity == 'ERROR':
             errores.append((log, explicacion))
@@ -145,14 +150,11 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
     # Introducción y Objetivo
     doc.add_heading('Introducción', level=1)
     doc.add_paragraph(
-        "Los logs son registros detallados de eventos que ocurren dentro de un sistema. Estos registros son fundamentales para la monitorización, "
-        "diagnóstico y auditoría del sistema, proporcionando un rastro de actividades que permite a los administradores y desarrolladores "
-        "identificar y resolver problemas, asegurar el cumplimiento normativo y mantener la seguridad del sistema."
+        "Los logs son registros detallados de eventos que ocurren dentro de un sistema. Estos registros son fundamentales para la monitorización, diagnóstico y auditoría del sistema, proporcionando un rastro de actividades que permite a los administradores y desarrolladores identificar y resolver problemas, asegurar el cumplimiento normativo y mantener la seguridad del sistema."
     )
     doc.add_heading('Objetivo de la Auditoría', level=1)
     doc.add_paragraph(
-        "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de "
-        "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
+        "El objetivo de esta auditoría es evaluar el estado actual del sistema mediante el análisis de los logs generados, identificar patrones de comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
 
     # Resumen Ejecutivo
@@ -174,8 +176,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         agregar_bordes_tabla(table)
         for log, explicacion in errores:
             row = table.add_row().cells
-            row[0].text = log[1]
-            row[1].text = log[2]
+            row[0].text = str(log[1]) if log[1] else "No disponible"
+            row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
             row[2].text = explicacion
     else:
         doc.add_paragraph("No se encontraron errores en los logs analizados.")
@@ -191,8 +193,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         agregar_bordes_tabla(table)
         for log, explicacion in advertencias:
             row = table.add_row().cells
-            row[0].text = log[1]
-            row[1].text = log[2]
+            row[0].text = str(log[1]) if log[1] else "No disponible"
+            row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
             row[2].text = explicacion
     else:
         doc.add_paragraph("No se encontraron advertencias en los logs analizados.")
@@ -208,8 +210,8 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         agregar_bordes_tabla(table)
         for log, explicacion in eventos_criticos:
             row = table.add_row().cells
-            row[0].text = log[1]
-            row[1].text = log[2]
+            row[0].text = str(log[1]) if log[1] else "No disponible"
+            row[1].text = str(log[2]) if len(log) > 2 and log[2] else "No disponible"
             row[2].text = explicacion
     else:
         doc.add_paragraph("No se encontraron eventos críticos en los logs analizados.")
@@ -315,5 +317,6 @@ def main():
             buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-if __name__ == "__main__":
+if __name__ == "__main
+__":
     main()
