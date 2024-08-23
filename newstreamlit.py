@@ -317,6 +317,5 @@ def main():
             buffer = generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros_eventos, total_logs)
             st.download_button(label="Descargar Informe Word", data=buffer, file_name="informe_auditoria_logs.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
-if __name__ == "__main
-__":
+if __name__ == "__main__":
     main()
