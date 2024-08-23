@@ -16,7 +16,7 @@ def leer_logs(file):
             return file.read().decode('latin-1').splitlines()
         elif file.name.endswith('.xlsx'):
             df = pd.read_excel(file)
-            if 'Severity' in df.columns and 'Message' in df.columns:
+            if 'Severity' in df.columns and 'Message' in df.columns and 'Timestamp' in df.columns:
                 return df[['Severity', 'Message', 'Timestamp']].values.tolist()
             else:
                 st.error("No se encontraron las columnas 'Severity', 'Message' o 'Timestamp' en el archivo.")
@@ -79,6 +79,18 @@ def analizar_logs(logs):
     
     return errores, advertencias, eventos_criticos, otros_eventos
 
+# Función para combinar resultados de múltiples archivos de logs
+def combinar_resultados(resultados):
+    errores, advertencias, eventos_criticos, otros_eventos = [], [], [], []
+    
+    for resultado in resultados:
+        errores.extend(resultado[0])
+        advertencias.extend(resultado[1])
+        eventos_criticos.extend(resultado[2])
+        otros_eventos.extend(resultado[3])
+    
+    return errores, advertencias, eventos_criticos, otros_eventos
+
 # Función para generar un resumen estadístico de los logs
 def generar_resumen(errores, advertencias, eventos_criticos, otros_eventos):
     return {
@@ -110,7 +122,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         "comportamiento anómalo, y determinar las áreas que requieren atención para mejorar la estabilidad, rendimiento y seguridad del sistema."
     )
     doc.add_paragraph("\n")
-    
     # Sección de Análisis de Errores
     doc.add_heading('Análisis de Errores', level=1)
     for log, explicacion in errores:
@@ -131,16 +142,6 @@ def generar_informe_word(resumen, errores, advertencias, eventos_criticos, otros
         doc.add_paragraph(f"Mensaje: {log[1]}", style='List Bullet')
         doc.add_paragraph(f"Hora: {log[2]}", style='List Bullet')
         doc.add_paragraph(f"Explicación: {explicacion}\n", style='List Bullet')
-
-    # Observaciones y Patrones
-    doc.add_heading('Patrones Recurrentes y Observaciones', level=1)
-    doc.add_paragraph(
-        "Se identificaron varios patrones recurrentes en los logs analizados, lo que sugiere posibles áreas problemáticas en el sistema. "
-        "Específicamente, se observó que ciertos errores tienden a ocurrir en intervalos de tiempo similares, lo que podría indicar "
-        "problemas relacionados con la carga del sistema o con procesos específicos que se ejecutan en esos momentos. "
-        "Además, las advertencias relacionadas con la seguridad requieren atención inmediata para evitar posibles brechas de seguridad."
-    )
-    
     # Recomendaciones y Mejores Prácticas
     doc.add_heading('Recomendaciones y Mejores Prácticas', level=1)
     doc.add_paragraph(
@@ -198,6 +199,7 @@ def main():
             if logs:
                 resultados.append(analizar_logs(logs))
         
+        # Aquí se llama a la función combinar_resultados
         errores, advertencias, eventos_criticos, otros_eventos = combinar_resultados(resultados)
         
         resumen = generar_resumen(errores, advertencias, eventos_criticos, otros_eventos)
